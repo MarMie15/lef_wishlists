@@ -1,0 +1,21 @@
+-Make a table for the groups
+
+options menu
+
+-make sure database table's get created when installing plugin
+-make sure it doesnt make multiple and dont check infinite times
+
+add user with invite link:
+user makes a link related to this group (maybe with cookie)
+person that clicks gets checked for a account,
+-make account if not
+person gets checked if they are already in said group
+-if not then add them
+
+
+Vandaag:
+- Custom post type maken genaamd "Groepen" -
+- Users kunnen gekoppeld worden aan zo'n groep -
+- Groepen moet de classic editor krijgen
+- ACF installeren
+- ACF forms

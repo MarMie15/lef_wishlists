@@ -1,0 +1,75 @@
+front-end:
+# -allow a user to create a group
+-allow user to invite people to that group
+--via email given by user, send invite to email
+---check if that email already exists, if so send invite on the website to accept
+---send email to invite person, check if user already exists:
+    -if user doesnt exists yet, prompt to make account, else skip
+    -allow (new) user to accept the invite and go to that group if they do
+    -send user to that group iof they accept, send to homepage otherwise
+
+-make a colomn in a table to keep track of if a user is in a group of if a user is invited and pending
+
+# -allow any user to make a wislist 
+# --allow user to add items to wishlist
+--allow user to delete items from wishlist
+---wislist has to be links to store with commision, for now just a list of links, probably needs api call
+
+# -make a roll system that makes the creator of the group the "owner"
+--allow "owner" to delete the group
+--allow "owner" to delete users
+--to-discuss allow "owner" to make other users a "owner" aswell
+
+homepage:
+# -user should instantly be able to make a new group
+# -if user is logged in, show their groups, allow user to open the group by clicking on items
+
+invites:
+-allow user to make a invite link for this group (maybe with cookie)
+-person that clicks this link gets checked for an account
+--if no account then promt to make an account, else skip
+-check if user is already in said group, if not add them, if they already are, notify them. either way go to group
+
+
+backend:
+# -make table's for the groups and wishlists
+# -make sure database tables get created when installing plugin
+# -make sure it doesnt make multiple and dont check infinite times
+# -a user needs to be able to make a wishlist whenever they want, couple a wishlist to a user
+# -if a user makes group they then need to be able to couple one of their wishlists
+# -connect the controls to the self made tables
+# -store meta data in my own thing
+# -make file sytem more OOP like so its easier to navigate
+# - Custom post type maken genaamd "Groepen" 
+# - Users kunnen gekoppeld worden aan zo'n groep 
+# - Groepen moet de classic editor krijgen 
+
+
+# to allow someone to delete something
+1. Groups & Users:
+
+    If you have a "Remove User from Group" button, ensure it includes:
+
+    <button class="lef-delete-button" data-type="remove_user_from_group" data-id="<?php echo $user_id; ?>" data-group-id="<?php echo $group_id; ?>">
+        Remove User
+    </button>
+
+2. Wishlists & Items:
+
+    If you have a "Delete Wishlist" button, make sure it has:
+
+<button class="lef-delete-button" data-type="delete_wishlist" data-id="<?php echo $wishlist_id; ?>">
+    Delete Wishlist
+</button>
+
+If you have a "Remove Wishlist from Group" button, add:
+
+<button class="lef-delete-button" data-type="remove_wishlist_from_group" data-id="<?php echo $wishlist_id; ?>" data-group-id="<?php echo $group_id; ?>">
+    Remove from Group
+</button>
+
+If you have a "Remove Item from Wishlist" button, ensure it has:
+
+<button class="lef-delete-button" data-type="delete_wishlist_item" data-wishlist-id="<?php echo $wishlist_id; ?>" data-product-id="<?php echo $product_id; ?>">
+    Remove Item
+</button>
