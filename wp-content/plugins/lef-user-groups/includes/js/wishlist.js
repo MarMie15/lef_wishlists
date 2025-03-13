@@ -59,14 +59,12 @@ document.addEventListener("DOMContentLoaded", function() {
     function addProductToWishlist(productId, productName) {
         alert(`The following has been added to your wishlist: ${productName}`);
 
-        // Ensure wishlist ID is available
-        const wishlistId = lefWishlistData.wishlist_id;;
+        const wishlistId = lefWishlistData.wishlist_id;
         if (!wishlistId) {
             console.error("Wishlist ID not found");
             return;
         }
-    
-        // Prepare the AJAX request
+
         fetch(lefWishlistData.ajax_url, {
             method: "POST",
             headers: {
@@ -81,7 +79,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // console.log("Product successfully added to wishlist!", data);
+                searchInput.value = "";  // Clear input field
+                resultsContainer.innerHTML = "";  // Clear search results
+                location.reload(); // reload the page
             } else {
                 console.error("Failed to add product:", data);
             }

@@ -287,12 +287,11 @@ function lef_display_user_groups_shortcode( $atts ) {
     // Build the output
     $output = '<ul class="lef-user-groups"> Groups:';
     foreach ($groups as $group) {
-        $output .= '<li class="lef-user-wishlist-item" style="float: left; margin-right: 30px;">';
+        $output .= '<li class="lef-user-wishlist-item">';
         $output .= '<a href="' . get_permalink($group->ID) . '">';
         $output .= esc_html($group->post_title);
         $output .= '</a>';
         $output .= '</li>';
-        $output .= '<span class="lef-delete-button" data-id="' . esc_attr($group->ID) . '" data-type="delete_wishlist">❌</span>';
     }
     $output .= '</ul>';
 
@@ -306,10 +305,12 @@ add_shortcode( 'lef_display_user_groups', 'lef_display_user_groups_shortcode' );
 function lef_show_group_users_shortcode( $atts ) {
     global $wpdb;
 
+    $current_user_id = get_current_user_id();
+
     // Get group ID from attributes or fallback to current post ID
     $atts = shortcode_atts(array(
         'group_id' => get_the_ID(), // Use current post ID if not provided
-    ),$atts);
+    ), $atts);
 
     $group_id = intval($atts['group_id']);
 
@@ -318,31 +319,96 @@ function lef_show_group_users_shortcode( $atts ) {
         return '<p class="lef-no-users">Invalid group.</p>';
     }
 
-    // Fetch user IDs associated with this group
-    $user_ids = $wpdb->get_col(
+    // Check if the current user is an owner of the group
+    $is_owner = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT user_id FROM wp_lef_groups_users WHERE group_id = %d",
+            "SELECT COUNT(*) FROM wp_lef_groups_users WHERE group_id = %d AND user_id = %d AND is_owner = 1",
+            $group_id,
+            $current_user_id
+        )
+    );
+
+    // Fetch users who have joined (separating owners and non-owners)
+    $joined_users = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT user_id, is_owner FROM wp_lef_groups_users WHERE group_id = %d AND has_joined = 1 ORDER BY is_owner DESC",
             $group_id
         )
     );
 
-    if (empty($user_ids)) {
-        return '<p class="lef-no-users">No users in this group.</p>';
+    // Fetch users who have been invited but haven't joined yet
+    $invited_users = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT user_id FROM wp_lef_groups_users WHERE group_id = %d AND has_joined = 0",
+            $group_id
+        )
+    );
+
+    // Generate output
+    $output = '<div class="lef-group-users">';
+
+    // Show joined users
+    if (!empty($joined_users)) {
+        $output .= '<h3>Current Users:</h3><ul>';
+        foreach ($joined_users as $user) {
+            $user_info = get_userdata($user->user_id);
+            if ($user_info) {
+                
+                $user_display = '';
+
+                if ($user->is_owner) {
+                    $user_display .= '👑 ';
+                }
+
+                $user_display .= esc_html($user_info->display_name);
+
+                $output .= '<li>' . $user_display;
+
+                //creates a delete button for any owner of the group
+                if ($is_owner && !$user->is_owner) {
+                    $output .= 
+                        '<span style="margin-left: 30px; " 
+                            class="lef-delete-button" 
+                            data-type="remove_user_from_group" 
+                            data-user-id=" ' . esc_attr($user_info->ID) . '" 
+                            data-group-id="' . esc_attr($group_id) . '">❌ 
+                        </span>';
+                }
+
+                $output .='</li>';
+            }
+        }
+        $output .= '</ul>';
     }
 
-    // Fetch user display names
-    $output = '<ul class="lef-group-users">Current users:';
-    foreach ($user_ids as $user_id) {
-        $user_info = get_userdata($user_id);
-        if ($user_info) {
-            $output .= '<li class="lef-group-user">' . esc_html($user_info->display_name) . '</li>';
-        }
+    if ($is_owner) {
+        $output .= 
+        '<form id="lef_invite_user" method="post">
+            <label for="lef_invitve-user-input">Invite a friend</label><br>
+            <input type="text" id="lef_invitve-user-input" placeholder="friend'."'".'s email">
+            <button type="submit">send invite!</button>
+        </form>';
     }
-    $output .= '</ul>';
+    
+
+    // Show invited but not joined users
+    if (!empty($invited_users)) {
+        $output .= '<h3>Pending invites:</h3><ul>';
+        foreach ($invited_users as $user) {
+            $user_info = get_userdata($user->user_id);
+            if ($user_info) {
+                $output .= '<li>' . esc_html($user_info->display_name) . '</li>';
+            }
+        }
+        $output .= '</ul>';
+    } 
+
+    $output .= '</div>';
 
     return $output;
 }
 add_shortcode('lef_show_group_users', 'lef_show_group_users_shortcode');
+
 
 /**
  * shortcode to allow a user to add one of their wishlists to this group
@@ -364,7 +430,7 @@ function lef_add_wishlist_to_group_shortcode($atts) {
     ob_start();
     ?>
     <div class="lef-add-group-wishlist">
-        <label for="group-wishlist-input">Add Wishlist to Group:</label><br>
+        <label for="group-wishlist-input">Add your wishlist to group:</label><br>
         <input type="text" id="group-wishlist-input" placeholder="Search your wishlists...">
         <ul id="group-wishlist-dropdown" class="lef-dropdown" style="display: none;"></ul>
         <p id="group-wishlist-message" style="display: none;"></p>
@@ -416,11 +482,31 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
         $output .= '<li style="float: left; margin-right: 30px;"><a href="' . get_permalink($wishlist->ID) . '">' . 
         esc_html($wishlist->post_title) . '</a>
         </li>' .
-        '<span class="lef-delete-button" data-type="remove_wishlist_from_group" data-id="'. $wishlist->ID . '" data-group-id="' . $group_id . '"> ❌ </span>'.
-        '<p> wishlistID: ' . $wishlist->ID . ' - groupID: '. $group_id . '</p>'; //debugging line
+        '<span class="lef-delete-button" data-wishlist-id="'. esc_attr($wishlist->ID) . '" data-group-id="' . esc_attr($group_id) . '"data-type="remove_wishlist_from_group">❌</span>';
     }
     $output .= '</ul>';
 
     return $output;
 }
 add_shortcode('lef_display_group_wishlists', 'lef_display_group_wishlists_shortcode');
+
+function lef_delete_group_button_shortcode() {
+    global $wpdb;
+
+    $group_id = get_the_ID();
+    $user_id = get_current_user_id();
+
+    // Check if the current user is an owner of the group
+    $is_owner = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM wp_lef_groups_users WHERE group_id = %d AND user_id = %d AND is_owner = 1",
+        $group_id,
+        $user_id
+    ));
+
+    if (!$is_owner) {
+        return ''; // Don't display anything if the user is not an owner
+    }
+
+    return '<p id="lef-delete-group-button" class="lef-delete-button" data-type="delete_group" data-id="' . esc_attr($group_id) . '" class="lef-delete-button" >❌ Delete Group ❌</p>';
+}
+add_shortcode('lef_delete_group_button', 'lef_delete_group_button_shortcode');

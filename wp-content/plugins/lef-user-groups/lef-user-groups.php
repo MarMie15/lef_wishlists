@@ -108,9 +108,10 @@ function lef_add_group_creator_to_table($post_ID, $post, $update) {
     $wpdb->insert(
         "{$wpdb->prefix}lef_groups_users",
         [
-            'group_ID' => $group_ID,
-            'user_ID'  => $user_ID,
-            'is_owner' => 1
+            'group_ID'   => $group_ID,
+            'user_ID'    => $user_ID,
+            'is_owner'   => 1,
+            'has_joined' => 1
         ],
         [
             '%d', '%d', '%d'
@@ -141,6 +142,7 @@ function lef_auto_append_shortcodes( $content ) {
         $content .= do_shortcode( '[lef_show_group_users groepen_id="' . $groepen_id . '"]	<hr>' );
         $content .= do_shortcode( '[lef_add_wishlist_to_group group_id="' . $groepen_id . '"] <hr>' );
         $content .= do_shortcode( '[lef_display_group_wishlists groepen_id="' . $groepen_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_delete_group_button groepen_id="' . $groepen_id . '"]' );
     }
     return $content;
 }

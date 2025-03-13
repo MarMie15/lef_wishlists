@@ -24,14 +24,20 @@ jQuery(document).ready(function($) {
             type: 'POST',
             url: typeof ajaxurl !== 'undefined' ? ajaxurl : lefDeleteData.ajax_url,
             data: requestData,
-            success: function(response) {
+            success: function(response) {  
                 if (response.success) {
                     alert(response.data.message);
-                    location.reload();
+            
+                    if (response.data.redirect_url) {
+                        window.location.href = response.data.redirect_url;  
+                    } else {
+                        location.reload(); // Only reload if no redirect
+                    }
                 } else {
                     alert(response.data.message);
                 }
-            },
+            }            
+            ,
             error: function() {
                 alert("An error occurred. Please try again.");
             }

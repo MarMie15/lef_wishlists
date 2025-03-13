@@ -92,6 +92,22 @@ function lef_add_product_to_wishlist() {
 add_action('wp_ajax_lef_add_product_to_wishlist', 'lef_add_product_to_wishlist');
 add_action('wp_ajax_nopriv_lef_add_product_to_wishlist', 'lef_add_product_to_wishlist');
 
+function lef_get_wishlist_items() {
+    if (!isset($_GET['wishlist_id'])) {
+        wp_send_json_error('Invalid request');
+    }
+
+    $wishlist_id = intval($_GET['wishlist_id']);
+    if ($wishlist_id <= 0) {
+        wp_send_json_error('Invalid wishlist ID');
+    }
+
+    echo do_shortcode('[lef_display_wishlist_items wishlist_id="' . $wishlist_id . '"]');
+    wp_die();
+}
+add_action('wp_ajax_lef_get_wishlist_items', 'lef_get_wishlist_items');
+add_action('wp_ajax_nopriv_lef_get_wishlist_items', 'lef_get_wishlist_items');
+
 // Fetch user wishlists
 function lef_get_user_wishlists() {
     if (!is_user_logged_in()) {
@@ -131,7 +147,7 @@ function lef_get_user_wishlists() {
     wp_send_json($response);
 }
 add_action('wp_ajax_lef_get_user_wishlists', 'lef_get_user_wishlists');
-add_action('wp_ajax_nopriv_lef_get_user_wishlists', 'lef_get_user_wishlists'); // For non-logged users (optional)
+add_action('wp_ajax_nopriv_lef_get_user_wishlists', 'lef_get_user_wishlists');
 
 function lef_add_wishlist_to_group() {
     global $wpdb;
@@ -194,7 +210,10 @@ function lef_delete_item() {
             // Delete the WordPress post directly
             if (get_post_type($item_id) === ($delete_type === 'delete_group' ? 'lef_groepen' : 'lef_wishlist')) {
                 wp_delete_post($item_id, true);
-                wp_send_json_success(['message' => ucfirst(str_replace('_', ' ', $delete_type)) . ' deleted successfully.']);
+                wp_send_json_success([
+                    'message' => ' deleted successfully.',
+                    'redirect_url' => home_url('/') // Redirect to homepage
+                ]);
             } else {
                 wp_send_json_error(['message' => 'Invalid post type.']);
             }
@@ -230,14 +249,14 @@ function lef_delete_item() {
 
             $entry = $wpdb->get_row($wpdb->prepare("
                 SELECT id FROM {$wpdb->prefix}lef_group_wishlists
-                WHERE group_id = %d AND wishlist_id = %d AND user_id = %d
-            ", $group_id, $wishlist_id, $user_id));
+                WHERE group_id = %d AND wishlist_id = %d
+            ", $group_id, $wishlist_id));
 
             if ($entry) {
                 $wpdb->delete("{$wpdb->prefix}lef_group_wishlists", ['id' => $entry->id]);
                 wp_send_json_success(['message' => 'Wishlist removed from group.']);
             } else {
-                wp_send_json_error(['message' => 'You cannot remove this wishlist from the group.']);
+                wp_send_json_error(['message' => 'An error has accorred trying to remove this wishlist from the group.']);
             }
             break;
 
