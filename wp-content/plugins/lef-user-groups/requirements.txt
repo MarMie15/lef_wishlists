@@ -10,9 +10,9 @@ front-end:
     -send user to that group iof they accept, send to homepage otherwise
 
 invites:
--allow user to make a invite link for this group (maybe with cookie)
--person that clicks this link gets checked for an account
---if no account then promt to make an account
+-allow user to make a invite link for this group
+-person that clicks this link gets checked for login
+--if not logged in then promt to log in or to make an account
 -check if user is already in said group, if not add them, if they already are, notify them. either way go to group
 
 # -make a colomn in a table to keep track of if a user is in a group of if a user is invited and pending
