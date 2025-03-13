@@ -290,3 +290,25 @@ function lef_delete_item() {
     }
 }
 add_action('wp_ajax_lef_delete_item', 'lef_delete_item');
+
+function lef_handle_invite_action() {
+    if (!is_user_logged_in() || !isset($_POST['group_id']) || !isset($_POST['action_type'])) {
+        wp_send_json_error('Invalid request');
+    }
+
+    global $wpdb;
+    $user_id = get_current_user_id();
+    $group_id = intval($_POST['group_id']);
+    $action_type = sanitize_text_field($_POST['action_type']);
+
+    if ($action_type === 'accept') {
+        $wpdb->update("{$wpdb->prefix}lef_groups_users", ['has_joined' => 1], ['user_id' => $user_id, 'group_id' => $group_id]);
+        wp_send_json_success('Invite accepted!');
+    } elseif ($action_type === 'decline') {
+        $wpdb->delete("{$wpdb->prefix}lef_groups_users", ['user_id' => $user_id, 'group_id' => $group_id]);
+        wp_send_json_success('Invite declined.');
+    }
+
+    wp_send_json_error('Invalid action');
+}
+add_action('wp_ajax_lef_handle_invite_action', 'lef_handle_invite_action');
