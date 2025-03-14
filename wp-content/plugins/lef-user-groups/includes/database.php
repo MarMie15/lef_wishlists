@@ -21,6 +21,7 @@ function create_custom_plugin_tables() {
         user_ID BIGINT(20) UNSIGNED NOT NULL,
         is_owner TINYINT(1) NOT NULL DEFAULT 0,
         has_joined TINYINT(1) NOT NULL DEFAULT 0,
+        added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (ID),
         FOREIGN KEY (group_ID) REFERENCES {$wpdb->prefix}posts(ID) ON DELETE CASCADE,
         FOREIGN KEY (user_ID) REFERENCES {$wpdb->prefix}users(ID) ON DELETE CASCADE
@@ -45,6 +46,18 @@ function create_custom_plugin_tables() {
         FOREIGN KEY (wishlist_ID) REFERENCES {$wpdb->prefix}posts(ID) ON DELETE CASCADE,
         FOREIGN KEY (product_ID) REFERENCES {$wpdb->prefix}posts(ID) ON DELETE CASCADE
     ) $charset_collate;";
+
+    $sql[] = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}lef_group_invites (
+        ID BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        group_ID BIGINT(20) UNSIGNED NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        invite_token VARCHAR(64) NOT NULL,
+        invite_expires DATETIME DEFAULT NULL,
+        invited_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (ID),
+        UNIQUE KEY unique_invite (group_ID, email),
+        FOREIGN KEY (group_ID) REFERENCES {$wpdb->prefix}posts(ID) ON DELETE CASCADE
+    )$charset_collate;";
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
