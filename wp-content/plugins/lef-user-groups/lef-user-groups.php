@@ -12,7 +12,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/scripts.php';
 require_once plugin_dir_path(__FILE__) . 'includes/database.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
-require_once plugin_dir_path(__FILE__) . 'includes/account-tabs.php';
+require_once plugin_dir_path(__FILE__) . 'includes/invite-tab.php';
 
 //makes all the required tables within the database
 register_activation_hook(__FILE__, 'create_custom_plugin_tables');
