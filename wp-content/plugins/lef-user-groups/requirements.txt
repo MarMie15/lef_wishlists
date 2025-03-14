@@ -17,6 +17,9 @@ invites:
 
 # -make a colomn in a table to keep track of if a user is in a group of if a user is invited and pending
 
+# -add invites section
+# -allow user to accept and decline invites
+
 # -allow any user to make a wislist 
 # --allow user to add items to wishlist
 # --allow user to delete items from wishlist

@@ -45,8 +45,8 @@ function lef_group_invites_content() {
     echo '<ul>';
     foreach ($invites as $invite) {
         echo '<li>' . esc_html($invite->post_title) . '</li>'.
-             ' <a style="color: green;" href="#" class="lef-accept-invite" data-group-id="' . esc_attr($invite->ID) . '">[Accept]</a> 
-               <a style="color: red;"   href="#" class="lef-decline-invite" data-group-id="' . esc_attr($invite->ID) . '">[Decline]</a></li>';
+             ' <a style="color: green;" href="#" class="lef-accept-invite" data-group-id=" '. esc_attr($invite->ID) .' ">[Accept]</a> 
+               <a style="color: red;"   href="#" class="lef-decline-invite" data-group-id=" '. esc_attr($invite->ID) .' ">[Decline]</a></li>';
     }
     echo '</ul>';
 }

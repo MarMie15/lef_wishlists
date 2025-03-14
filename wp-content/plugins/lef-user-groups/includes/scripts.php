@@ -46,5 +46,18 @@ function lef_enqueue_scripts() {
     wp_localize_script('lef-delete-js', 'lefDeleteData', array(
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
+    
+    wp_enqueue_script(
+        'lef-invites-js', 
+        plugin_dir_url(__FILE__) . 'js/invites.js', 
+        array('jquery'), 
+        null, 
+        true
+    );
+
+    wp_localize_script('lef-invites-js', 'lefInvitesData', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ));
+
 }
 add_action('wp_enqueue_scripts', 'lef_enqueue_scripts');

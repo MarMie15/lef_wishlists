@@ -11,7 +11,7 @@ var lefGroupWishlist = (function() {
     function setupEventListeners() {
         let input = document.getElementById('group-wishlist-input');
         let dropdown = document.getElementById('group-wishlist-dropdown');
-
+    
         input.addEventListener('focus', function() {
             fetchWishlists(""); // Show all options when clicked
             dropdown.style.display = 'block';
@@ -89,62 +89,6 @@ var lefGroupWishlist = (function() {
                     }, 30000);
                 } else {
                     alert("Failed to add wishlist. Please try again.");
-                }
-            }
-        });
-    }
-
-    function fetchInvites() {
-        jQuery.ajax({
-            url: lefWishlistData.ajax_url,
-            type: "POST",
-            data: { action: "lef_get_user_invites" },
-            success: function(response) {
-                let inviteContainer = document.getElementById("invite-list");
-                if (!inviteContainer) return;
-                inviteContainer.innerHTML = '';
-
-                if (!response || response.length === 0) {
-                    inviteContainer.innerHTML = '<p>No pending invites.</p>';
-                    return;
-                }
-
-                response.forEach(function(invite) {
-                    let inviteItem = document.createElement("div");
-                    inviteItem.innerHTML = `<p>Invitation to ${invite.group_name}</p>
-                        <button onclick="acceptInvite(${invite.group_id})">Accept</button>
-                        <button onclick="declineInvite(${invite.group_id})">Decline</button>`;
-                    inviteContainer.appendChild(inviteItem);
-                });
-            }
-        });
-    }
-
-    function acceptInvite(groupId) {
-        jQuery.ajax({
-            url: lefWishlistData.ajax_url,
-            type: "POST",
-            data: { action: "lef_accept_invite", group_id: groupId },
-            success: function(response) {
-                if (response.success) {
-                    fetchInvites();
-                } else {
-                    alert("Failed to accept invite.");
-                }
-            }
-        });
-    }
-
-    function declineInvite(groupId) {
-        jQuery.ajax({
-            url: lefWishlistData.ajax_url,
-            type: "POST",
-            data: { action: "lef_decline_invite", group_id: groupId },
-            success: function(response) {
-                if (response.success) {
-                    fetchInvites();
-                } else {
-                    alert("Failed to decline invite.");
                 }
             }
         });
