@@ -5,7 +5,6 @@ var lefGroupWishlist = (function() {
         groupId = gId;
         setupEventListeners();
         fetchWishlists(""); // Load all wishlists initially
-        fetchInvites(); // Load invites when initializing
     }
 
     function setupEventListeners() {
@@ -93,6 +92,5 @@ var lefGroupWishlist = (function() {
             }
         });
     }
-
     return { init };
 })();

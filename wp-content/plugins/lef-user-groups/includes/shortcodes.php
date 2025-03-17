@@ -385,7 +385,7 @@ function lef_show_group_users_shortcode( $atts ) {
         $output .= 
         '<form id="lef_invite_user" method="post">
             <label for="lef_invitve-user-input">Invite a friend</label><br>
-            <input type="text" id="lef_invitve-user-input" placeholder="friend'."'".'s email">
+            <input type="text" class="lef_invitve-user-input" placeholder="friend'."'".'s email">
             <button type="submit">send invite!</button>
         </form>';
     }
