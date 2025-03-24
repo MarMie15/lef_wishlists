@@ -298,6 +298,56 @@ function lef_handle_existing_user_invite() {
 }
 add_action('template_redirect', 'lef_handle_existing_user_invite');
 
+function lef_handle_new_user_invite() {
+    error_log("lef_handle_new_user_invite called");
+    if (isset($_GET['accept_invite'])) {
+        global $wpdb;
+        $token = sanitize_text_field($_GET['accept_invite']);
+
+        // Retrieve invite using the token
+        $invite = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}lef_group_invites WHERE token = %s", $token
+        ));
+
+        if (!$invite) {
+            wp_redirect(site_url("/"));
+            error_log("no invite");
+            exit;
+        }
+
+        if (!is_user_logged_in()) {
+            // If the user is not logged in, save the token in a session and redirect to the login/register page
+            $_SESSION['lef_invite_token'] = $token;  // Store token in session
+            wp_redirect(site_url("/index.php/my-account-2/"));
+            error_log("user is not logged in");
+            exit;
+        }
+
+        // If user is logged in, verify the email and add the user to the group
+        $user = wp_get_current_user();
+        if (strtolower($user->user_email) === strtolower($invite->email)) {
+            $wpdb->insert("{$wpdb->prefix}lef_groups_users", [
+                'group_id' => $invite->group_id,
+                'user_id' => $user->ID,
+                'has_joined' => 1,
+                'added_at' => current_time('mysql')
+            ]);
+
+            // Remove the invite from the database after it has been processed
+            $wpdb->delete("{$wpdb->prefix}lef_group_invites", ['token' => $token]);
+
+            // Redirect to the group page
+            wp_redirect(site_url("/group-page/?group_id=" . $invite->group_id));
+            exit;
+        }
+
+        // If the email doesn't match, redirect to the homepage
+        wp_redirect(site_url("/"));
+        exit;
+    }
+}
+add_action('init', 'lef_handle_new_user_invite');
+
 function lef_process_invite_after_login($user_login, $user) {
     error_log("lef_process_invite_after_login");
     // Check if there is an invite stored in the session
@@ -357,56 +407,6 @@ function lef_process_invite_after_login($user_login, $user) {
     }
 }
 add_action('wp_login', 'lef_process_invite_after_login', 10, 2);
-
-function lef_handle_new_user_invite() {
-    error_log("lef_handle_new_user_invite called");
-    if (isset($_GET['accept_invite'])) {
-        global $wpdb;
-        $token = sanitize_text_field($_GET['accept_invite']);
-
-        // Retrieve invite using the token
-        $invite = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}lef_group_invites WHERE token = %s", $token
-        ));
-
-        if (!$invite) {
-            wp_redirect(site_url("/"));
-            error_log("no invite");
-            exit;
-        }
-
-        if (!is_user_logged_in()) {
-            // If the user is not logged in, save the token in a session and redirect to the login/register page
-            $_SESSION['lef_invite_token'] = $token;  // Store token in session
-            wp_redirect(site_url("/index.php/my-account-2/"));
-            error_log("user is not logged in");
-            exit;
-        }
-
-        // If user is logged in, verify the email and add the user to the group
-        $user = wp_get_current_user();
-        if (strtolower($user->user_email) === strtolower($invite->email)) {
-            $wpdb->insert("{$wpdb->prefix}lef_groups_users", [
-                'group_id' => $invite->group_id,
-                'user_id' => $user->ID,
-                'has_joined' => 1,
-                'added_at' => current_time('mysql')
-            ]);
-
-            // Remove the invite from the database after it has been processed
-            $wpdb->delete("{$wpdb->prefix}lef_group_invites", ['token' => $token]);
-
-            // Redirect to the group page
-            wp_redirect(site_url("/group-page/?group_id=" . $invite->group_id));
-            exit;
-        }
-
-        // If the email doesn't match, redirect to the homepage
-        wp_redirect(site_url("/"));
-        exit;
-    }
-}
-add_action('init', 'lef_handle_new_user_invite');
 
 function lef_accept_invite_after_login($user_login, $user) {
     error_log("lef_accept_invite_after_login called");
