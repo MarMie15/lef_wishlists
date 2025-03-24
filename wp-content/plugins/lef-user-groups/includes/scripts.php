@@ -58,6 +58,18 @@ function lef_enqueue_scripts() {
     wp_localize_script('lef-invites-js', 'lefInvitesData', array(
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
+        
+    wp_enqueue_script(
+        'lef-color-picker',
+        plugin_dir_url(__FILE__) . 'js/color-picker.js',
+        array('jquery'), 
+        null, 
+        true
+    );
+    
+    wp_localize_script('lef-color-picker', 'lefCustomData', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ));
 
 }
 add_action('wp_enqueue_scripts', 'lef_enqueue_scripts');
