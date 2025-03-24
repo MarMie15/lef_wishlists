@@ -89,6 +89,9 @@ add_action('init', 'create_wishlist_post_type');
 
 
 
+
+
+
 //give post from groepen or wishlists the old editor 
 function disable_gutenberg_for_groepen($use_block_editor, $post_type) {
     if ($post_type === 'lef_groepen' || $post_type === 'lef_wishlist') {
@@ -249,8 +252,6 @@ function lef_handle_existing_user_invite() {
 
         // Check if the current user is the one invited
         if ($current_user->ID == $user_id) {
-            error_log("User is logged in and matches the invited user.");
-
             // Accept the invite and add the user to the group
             global $wpdb;
             $table_name = $wpdb->prefix . 'lef_groups_users';
@@ -310,7 +311,6 @@ function lef_handle_new_user_invite() {
     global $wpdb;
     $token = sanitize_text_field($_GET['token']);
     $email = sanitize_email($_GET['email']);
-    error_log("Invite token received: " . $token . " for email: " . $email);    
 
     // Retrieve invite using the token
     $invite = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_lef_group_invites WHERE invite_token = %s", $token));
@@ -335,10 +335,6 @@ function lef_handle_new_user_invite() {
         $_SESSION['lef_invite_email'] = $invite->email;
         $_SESSION['lef_invite_group_id'] = $invite->group_id;
 
-        // error_log("lef_invite'_token: ".$_SESSION['lef_invite_token']);
-        // error_log("lef_invite_email: ".$_SESSION['lef_invite_email']);
-        // error_log("User does not exist yet. Redirecting to login/registration...");
-        
         wp_redirect(site_url("/index.php/my-account-2/"));
         exit;
     }
