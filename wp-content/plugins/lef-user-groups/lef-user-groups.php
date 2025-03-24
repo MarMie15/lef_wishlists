@@ -8,6 +8,7 @@
 
 if (!defined('ABSPATH')) exit;
 
+require_once plugin_dir_path(__FILE__) . 'includes/settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/scripts.php';
 require_once plugin_dir_path(__FILE__) . 'includes/database.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes.php';
@@ -86,11 +87,6 @@ function create_wishlist_post_type() {
     );
 }
 add_action('init', 'create_wishlist_post_type');
-
-
-
-
-
 
 //give post from groepen or wishlists the old editor 
 function disable_gutenberg_for_groepen($use_block_editor, $post_type) {
