@@ -2,18 +2,17 @@ front-end:
 # -allow a user to create a group
 # -allow user to invite people to that group
 --via email given by user, send invite to email
----check if user has already been invited
----check if that user email already exists, if so send invite on the website to accept
----send email to invite person, check if user already exists:
-    -if user doesnt exists yet, prompt to make account
-    -allow (new) user to accept the invite and go to that group if they do
-    -send user to that group iof they accept, send to homepage otherwise
+# ---check if user has already been invited
+# ---check if that user already exists via email 
+---send email to invite person with invite
+    # -if user doesnt exists yet, prompt to make account
+    # -if user isnt logged in prompt to log in
+    # -(new) user accepts the invite on click and goes to that group once logged in
 
-invites:
+# invites:
 # -allow user to make a invite link for this group
--person that clicks this link gets checked for login
---if not logged in then promt to log in or to make an account
--check if user is already in said group, if not add them, if they already are, notify them. either way go to group
+# --if not logged in then promt to log in or to make an account
+# -check if user is already in said group, if not add them, if they already are, notify them. either way go to group
 
 # -make a colomn in a table to keep track of if a user is in a group of if a user is invited and pending
 
@@ -32,7 +31,7 @@ invites:
 
 -allow a owner to randomly assign a different users wishist to someone else
 
-make sure a user can only access wishlists and groups they are a part of 
+# make sure a user can only access wishlists and groups they are a part of   //seems correct for now
 
 # homepage:
 # -user should instantly be able to make a new group
