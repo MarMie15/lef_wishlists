@@ -208,7 +208,6 @@ function lef_add_invite_notification_badge() {
 add_action('wp_footer', 'lef_add_invite_notification_badge');
 
 function lef_handle_existing_user_invite() {
-    error_log("lef_handle_existing_user_invite called");
     // Start the session if not already started
     if (!session_id()) {
         session_start();
@@ -299,8 +298,6 @@ function lef_handle_existing_user_invite() {
 add_action('template_redirect', 'lef_handle_existing_user_invite');
 
 function lef_handle_new_user_invite() {
-    error_log("lef_handle_new_user_invite called");
-
     if (!session_id()) {
         session_start();
         error_log("Session started successfully");
@@ -339,44 +336,18 @@ function lef_handle_new_user_invite() {
         $_SESSION['lef_invite_email'] = $invite->email;
         $_SESSION['lef_invite_group_id'] = $invite->group_id;
 
-        error_log("lef_invite'_token: ".$_SESSION['lef_invite_token']);
-        error_log("lef_invite_email: ".$_SESSION['lef_invite_email']);
+        // error_log("lef_invite'_token: ".$_SESSION['lef_invite_token']);
+        // error_log("lef_invite_email: ".$_SESSION['lef_invite_email']);
 
-        error_log("User does not exist yet. Redirecting to login/registration...");
+        // error_log("User does not exist yet. Redirecting to login/registration...");
         wp_redirect(site_url("/index.php/my-account-2/"));
         exit;
     }
-
-    //everything below here is probably obsolete now
-    $user = wp_get_current_user();
-    error_log("User logged in: " . $user->user_email);
-
-    if (strtolower($user->user_email) === strtolower($invite->email)) {
-        $wpdb->insert("{$wpdb->prefix}lef_groups_users", [
-            'group_id' => $invite->group_id,
-            'user_id' => $user->ID,
-            'has_joined' => 1,
-            'added_at' => current_time('mysql')
-        ]);
-
-        $wpdb->delete("{$wpdb->prefix}lef_group_invites", ['token' => $token]);
-
-        error_log("User added to group. Redirecting to group page.");
-        wp_redirect(site_url("/group-page/?group_id=" . $invite->group_id));
-        exit;
-    }
-
-    error_log("User email does not match invite email. Redirecting to homepage.");
-    wp_redirect(site_url("/"));
     exit;
 }
 add_action('template_redirect', 'lef_handle_new_user_invite');
 
-
-
 function lef_process_invite_after_registration($user_id) {
-    error_log("lef_process_invite_after_registration called for user_id: $user_id");
-
     if (!session_id()) {
         session_start();
     }
@@ -423,7 +394,7 @@ function lef_process_invite_after_registration($user_id) {
     // Remove the invite from the database
     $wpdb->delete("{$wpdb->prefix}lef_group_invites", ['invite_token' => $token]);
 
-    error_log("New user added to group $group_id via invite.");
+    // error_log("New user added to group $group_id via invite.");
 
     // Clear the session variables
     unset($_SESSION['lef_invite_token'], $_SESSION['lef_invite_email'], $_SESSION['lef_invite_group_id']);
@@ -434,17 +405,14 @@ function lef_process_invite_after_registration($user_id) {
 }
 add_action('user_register', 'lef_process_invite_after_registration');
 
-
-
 function lef_process_invite_after_login($user_login, $user) {
-    error_log("lef_process_invite_after_login");
     // Check if there is an invite stored in the session
     if (isset($_SESSION['invite_group_id']) && isset($_SESSION['invite_user_id'])) {
         global $wpdb;
         $group_id = $_SESSION['invite_group_id'];
         $user_id = $_SESSION['invite_user_id'];
 
-        error_log("Processing invite for Group ID: $group_id, User ID: $user_id");
+        // error_log("Processing invite for Group ID: $group_id, User ID: $user_id");
 
         // If $user isn't an instance of WP_User, get the current user object
         if (is_string($user) || !is_object($user) || !isset($user->ID)) {
@@ -453,7 +421,7 @@ function lef_process_invite_after_login($user_login, $user) {
 
         // Get the current logged-in user
         if ($user->ID == $user_id) {
-            error_log("found Id User ID: $user_id");
+            // error_log("found Id User ID: $user_id");
             // Accept the invite and add the user to the group
             $table_name = $wpdb->prefix . 'lef_groups_users';
 
@@ -471,7 +439,7 @@ function lef_process_invite_after_login($user_login, $user) {
                     'has_joined' => 1,
                     'added_at' => current_time('mysql')
                 ]);
-                error_log("User added to the group.");
+                // error_log("User added to the group.");
             } elseif ($existing_user == 0) {
                 // If the user is in the group but hasn't joined, update their status to 'joined'
                 $wpdb->update(
@@ -479,7 +447,7 @@ function lef_process_invite_after_login($user_login, $user) {
                     ['has_joined' => 1],
                     ['group_id' => $group_id, 'user_id' => $user_id]
                 );
-                error_log("User's invite accepted and updated to 'has_joined'.");
+                // error_log("User's invite accepted and updated to 'has_joined'.");
             }
 
             // Set the session flag indicating that the invite has been accepted
