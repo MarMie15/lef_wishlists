@@ -304,7 +304,6 @@ function lef_handle_new_user_invite() {
     }
 
     if (!isset($_GET['token']) || !isset($_GET['email'])) {
-        error_log("No token or email parameter found in URL.");
         return;
     }    
 
@@ -338,8 +337,8 @@ function lef_handle_new_user_invite() {
 
         // error_log("lef_invite'_token: ".$_SESSION['lef_invite_token']);
         // error_log("lef_invite_email: ".$_SESSION['lef_invite_email']);
-
         // error_log("User does not exist yet. Redirecting to login/registration...");
+        
         wp_redirect(site_url("/index.php/my-account-2/"));
         exit;
     }
