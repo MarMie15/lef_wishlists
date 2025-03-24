@@ -37,6 +37,9 @@ front-end:
 # -user should instantly be able to make a new group
 # -if user is logged in, show their groups, allow user to open the group by clicking on items
 
+# -make an options menu
+--have multiple main colors
+--start styling the shortcodes
 
 # backend:
 # -make table's for the groups and wishlists

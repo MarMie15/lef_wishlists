@@ -58,18 +58,24 @@ function lef_enqueue_scripts() {
     wp_localize_script('lef-invites-js', 'lefInvitesData', array(
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
-        
+    
+}
+add_action('wp_enqueue_scripts', 'lef_enqueue_scripts');
+
+function lef_admin_enqueue_scripts($hook) {
+    // Only load on the settings page
+    if ($hook !== 'toplevel_page_lef_settings') {
+        return;
+    }
+
+    // Enqueue WordPress color picker
+    wp_enqueue_style('wp-color-picker');
     wp_enqueue_script(
-        'lef-color-picker',
-        plugin_dir_url(__FILE__) . 'js/color-picker.js',
-        array('jquery'), 
+        'lef-settings-js', 
+        plugin_dir_url(__FILE__) . 'js/settings.js', 
+        array('jquery', 'wp-color-picker'), 
         null, 
         true
     );
-    
-    wp_localize_script('lef-color-picker', 'lefCustomData', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-    ));
-
 }
-add_action('wp_enqueue_scripts', 'lef_enqueue_scripts');
+add_action('admin_enqueue_scripts', 'lef_admin_enqueue_scripts');
