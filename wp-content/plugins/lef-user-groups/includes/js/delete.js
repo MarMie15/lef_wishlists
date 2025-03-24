@@ -1,11 +1,12 @@
 jQuery(document).ready(function($) {
     $(".lef-delete-button").on("click", function() {
-        let itemID = $(this).data('id');
         let deleteType = $(this).data('type');
+        let itemID = $(this).data('id') || null;
         let groupID = $(this).data('group-id') || null;
         let userID = $(this).data('user-id') || null;
         let wishlistID = $(this).data('wishlist-id') || null;
         let productID = $(this).data('product-id') || null;
+        let userEmail = $(this).data('user-email') || null;
 
         if (!confirm("Are you sure you want to delete this item?")) return;
 
@@ -19,10 +20,11 @@ jQuery(document).ready(function($) {
         if (userID) requestData.user_id = userID;
         if (wishlistID) requestData.wishlist_id = wishlistID;
         if (productID) requestData.product_id = productID;
+        if (userEmail) requestData.user_email = userEmail;
 
         $.ajax({
             type: 'POST',
-            url: typeof ajaxurl !== 'undefined' ? ajaxurl : lefDeleteData.ajax_url,
+            url: lefDeleteData.ajax_url,
             data: requestData,
             success: function(response) {  
                 if (response.success) {

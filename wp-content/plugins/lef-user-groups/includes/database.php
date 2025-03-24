@@ -11,7 +11,7 @@ function create_custom_plugin_tables() {
     $lef_groups_users_table = $wpdb->prefix . 'lef_groups_users';
     $lef_group_wishlists_table = $wpdb->prefix . 'lef_group_wishlists';
     $lef_wishlist_items_table = $wpdb->prefix . 'lef_wishlist_items';
-    $lef_item_inventory_table = $wpdb->prefix . 'lef_item_inventory';
+    $lef_group_invites = $wpdb->prefix . 'lef_group_invites';
     
     $sql = [];
 
@@ -47,7 +47,7 @@ function create_custom_plugin_tables() {
         FOREIGN KEY (product_ID) REFERENCES {$wpdb->prefix}posts(ID) ON DELETE CASCADE
     ) $charset_collate;";
 
-    $sql[] = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}lef_group_invites (
+    $sql[] = "CREATE TABLE IF NOT EXISTS $lef_group_invites (
         ID BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         group_ID BIGINT(20) UNSIGNED NOT NULL,
         email VARCHAR(255) NOT NULL,

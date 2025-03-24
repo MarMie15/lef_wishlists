@@ -186,6 +186,7 @@ function lef_add_wishlist_to_group() {
 
     if ($result) {
         wp_send_json_success(["message" => "Wishlist added successfully"]);
+
     } else {
         wp_send_json_error(["message" => "Database insert failed  wishlist: ". $wishlist_id ."  group:  " . $groepen_id]);
     }
@@ -268,7 +269,7 @@ function lef_delete_item() {
             $group_id = intval($_POST['group_id']);
             $target_user_id = intval($_POST['user_id']);
 
-            // Corrected ownership check using lef_groups_users
+            // ownership check using lef_groups_users
             $is_owner = $wpdb->get_var($wpdb->prepare("
                 SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
                 WHERE group_id = %d AND user_id = %d AND is_owner = 1
@@ -285,6 +286,80 @@ function lef_delete_item() {
             }
             break;
 
+            case 'remove_invite_existing_user':
+                if (!isset($_POST['group_id']) || !isset($_POST['user_id'])) {
+                    wp_send_json_error(['message' => 'Missing group or user ID.']);
+                }
+            
+                $group_id = intval($_POST['group_id']);
+                $user_id = intval($_POST['user_id']);
+                $current_user_id = get_current_user_id();
+            
+                // Verify that the current user is the owner
+                $is_owner = $wpdb->get_var($wpdb->prepare("
+                    SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
+                    WHERE group_id = %d AND user_id = %d AND is_owner = 1
+                ", $group_id, $current_user_id));
+            
+                if (!$is_owner) {
+                    wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
+                }
+            
+                // Check if the user has an invite (but hasn’t joined yet)
+                $invite_exists = $wpdb->get_var($wpdb->prepare("
+                    SELECT id FROM {$wpdb->prefix}lef_groups_users 
+                    WHERE group_id = %d AND user_id = %d
+                ", $group_id, $user_id));
+            
+                if ($invite_exists) {
+                    // Delete the invite from `lef_group_invites`
+                    $wpdb->delete("{$wpdb->prefix}lef_groups_users", [
+                        'group_id' => $group_id,
+                        'user_id'  => $user_id
+                    ]);
+                    wp_send_json_success(['message' => 'Invite removed for existing user.']);
+                } else {
+                    wp_send_json_error(['message' => 'No pending invite found for this user.']);
+                }
+                break;
+            
+            case 'remove_invite_unknown_user':
+                if (!isset($_POST['group_id']) || !isset($_POST['user_email'])) {
+                    wp_send_json_error(['message' => 'Missing group or user email.']);
+                }
+            
+                $group_id = intval($_POST['group_id']);
+                $user_email = sanitize_email($_POST['user_email']);
+                $current_user_id = get_current_user_id();
+            
+                // Verify that the current user is the owner
+                $is_owner = $wpdb->get_var($wpdb->prepare("
+                    SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
+                    WHERE group_id = %d AND user_id = %d AND is_owner = 1
+                ", $group_id, $current_user_id));
+            
+                if (!$is_owner) {
+                    wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
+                }
+            
+                // Check if the invite exists for this email
+                $invite_exists = $wpdb->get_var($wpdb->prepare("
+                    SELECT id FROM {$wpdb->prefix}lef_group_invites 
+                    WHERE group_id = %d AND email = %s
+                ", $group_id, $user_email));
+            
+                if ($invite_exists) {
+                    // Delete the invite from `lef_group_invites`
+                    $wpdb->delete("{$wpdb->prefix}lef_group_invites", [
+                        'group_id' => $group_id,
+                        'email'    => $user_email
+                    ]);
+                    wp_send_json_success(['message' => 'Invite removed for unknown user.']);
+                } else {
+                    wp_send_json_error(['message' => 'No pending invite found for this email.']);
+                }
+                break;
+            
         default:
             wp_send_json_error(['message' => 'Invalid delete type.']);
     }
@@ -312,3 +387,91 @@ function lef_handle_invite_action() {
     wp_send_json_error('Invalid action');
 }
 add_action('wp_ajax_lef_handle_invite_action', 'lef_handle_invite_action');
+
+function lef_send_invite() {
+    if (!isset($_POST['email']) || !isset($_POST['group_id'])) {
+        wp_send_json_error("Invalid request. Missing email or group ID.");
+    }
+
+    global $wpdb;
+    $email = sanitize_email($_POST['email']);
+    $group_id = intval($_POST['group_id']); 
+
+    if (!$group_id) {
+        wp_send_json_error("Invalid group ID.");
+    }
+
+    // Check if the email belongs to an existing user
+    $user = get_user_by('email', $email);
+    $table_groups_users = $wpdb->prefix . "lef_groups_users";
+    $table_invites = $wpdb->prefix . "lef_group_invites";
+
+    if ($user) {
+        $user_id = $user->ID;
+
+        // Check if user is already in the group
+        $existing_user = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $table_groups_users WHERE group_id = %d AND user_id = %d",
+            $group_id, $user_id
+        ));
+
+        if ($existing_user) {
+            wp_send_json_error("This user is already a member of this group.");
+        }
+
+        // Generate an invite link for existing users
+        $invite_link = site_url("/?join_group=$group_id&user_id=$user_id");
+        
+        // If not in the group, add user
+        $wpdb->insert($table_groups_users, [
+            'group_id'   => $group_id,
+            'user_id'    => $user_id,
+            'has_joined' => 0,
+            'added_at'   => current_time('mysql')
+        ]);
+        
+        wp_send_json_success([
+            'message' => "Existing user added. Copy and share this link:",
+            'invite_link' => $invite_link
+        ]);
+
+        //add mailing functionality here later
+    } else {
+        // New user logic (check invites first)
+        $table_invites = $wpdb->prefix . "lef_group_invites";
+
+        $existing_invite = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $table_invites WHERE group_id = %d AND email = %s",
+            $group_id, $email
+        ));
+
+        if ($existing_invite) {
+            wp_send_json_error("This email has already been invited to this group.");
+        }
+
+        // Generate and store invite
+        $token = wp_generate_password(20, false);
+        $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+        $wpdb->insert($table_invites, [
+            'group_id'       => $group_id,
+            'email'          => $email,
+            'invite_token'   => $token,
+            'invite_expires' => $expires,
+            'invited_at'     => current_time('mysql')
+        ]);
+
+        // Generate an invite link for new users
+        $invite_link = site_url("/register/?token=$token&email=$email");
+
+        wp_send_json_success([
+            'message' => "New user invite created. Copy and share this link:",
+            'invite_link' => $invite_link
+        ]);
+
+        //add mailing functionality here later
+    }
+}
+
+add_action('wp_ajax_lef_send_invite', 'lef_send_invite');
+add_action('wp_ajax_nopriv_lef_send_invite', 'lef_send_invite');

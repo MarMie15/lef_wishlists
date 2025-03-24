@@ -1,6 +1,6 @@
 front-end:
 # -allow a user to create a group
--allow user to invite people to that group
+# -allow user to invite people to that group
 --via email given by user, send invite to email
 ---check if user has already been invited
 ---check if that user email already exists, if so send invite on the website to accept
@@ -10,7 +10,7 @@ front-end:
     -send user to that group iof they accept, send to homepage otherwise
 
 invites:
--allow user to make a invite link for this group
+# -allow user to make a invite link for this group
 -person that clicks this link gets checked for login
 --if not logged in then promt to log in or to make an account
 -check if user is already in said group, if not add them, if they already are, notify them. either way go to group

@@ -9,7 +9,7 @@ jQuery(document).ready(function($) {
         console.log("clicked");
 
         $.ajax({
-            url: typeof ajaxurl !== 'undefined' ? ajaxurl : lefDeleteData.ajax_url,
+            url: lefDeleteData.ajax_url,
             type: 'POST',
             data: {
                 action: 'lef_handle_invite_action',
@@ -28,5 +28,58 @@ jQuery(document).ready(function($) {
                 location.reload();
             }
         });
+    });
+
+    
+    // Invite user logic
+    $('#lef_invite_user').on('submit', function(e) {
+        e.preventDefault();
+    
+        let form = $(this);
+        let emailInput = form.find('.lef_invite-user-input');
+        let email = emailInput.val().trim();
+        let groupID = form.data('group-id'); 
+    
+        if (!email || !groupID) {
+            alert("Error: Missing email or group information.");
+            return;
+        }
+    
+        $.ajax({
+            url: lefDeleteData.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'lef_send_invite',
+                email: email,
+                group_id: groupID
+            },
+            success: function(response) {   
+                if (response.success) {
+                    alert(response.data.message + "\n" + response.data.invite_link);
+                } else {
+                    alert("Error: " + response.data);
+                }
+                location.reload();
+            },
+            error: function() {
+                alert("Something went wrong.");
+            }
+            // beforeSend: function() {
+            //     emailInput.prop('disabled', true);
+            // },
+            // success: function(response) {
+            //     if (response.success) {
+            //         alert("Invite sent successfully!");
+            //     } else {
+            //         alert(response.data); // Show the returned error message
+            //     }
+            //     emailInput.val("").prop('disabled', false);
+            //     location.reload();
+            // },
+            // error: function(error) {
+            //     console.error("AJAX Error:", error);
+            //     emailInput.prop('disabled', false);
+            // }
+        });        
     });
 });

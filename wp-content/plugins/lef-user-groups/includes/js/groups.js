@@ -85,7 +85,9 @@ var lefGroupWishlist = (function() {
                     
                     setTimeout(() => {
                         message.style.display = "none";
-                    }, 30000);
+                        location.reload();
+                    }, 1500);
+                    
                 } else {
                     alert("Failed to add wishlist. Please try again.");
                 }

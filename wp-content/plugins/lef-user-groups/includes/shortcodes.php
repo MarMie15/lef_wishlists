@@ -172,7 +172,7 @@ function lef_display_user_wishlists_shortcode( $atts ) {
     // Build the output
     $output = '<ul class="lef-user-wishlists"> Wishlists:';
     foreach ($wishlists as $wishlist) {
-        $output .= '<li class="lef-user-wishlist-item" style="float: left; margin-right: 20px;">';
+        $output .= '<li class="lef-user-wishlist-item" style="float: left; margin-right: 30px;">';
         $output .= '<a href="' . get_permalink($wishlist->ID) . '">';
         $output .= esc_html($wishlist->post_title);
         $output .= '</a>';
@@ -256,10 +256,9 @@ function lef_display_user_groups_shortcode( $atts ) {
     global $wpdb;
     $user_id = get_current_user_id();
 
-    // Query the wp_lef_groups_users table for group IDs where the user is a member
     $group_ids = $wpdb->get_col(
         $wpdb->prepare(
-            "SELECT group_id FROM wp_lef_groups_users WHERE user_id = %d",
+            "SELECT group_ID FROM {$wpdb->prefix}lef_groups_users WHERE user_ID = %d AND has_joined = 1",
             $user_id
         )
     );
@@ -339,8 +338,12 @@ function lef_show_group_users_shortcode( $atts ) {
     // Fetch users who have been invited but haven't joined yet
     $invited_users = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT user_id FROM wp_lef_groups_users WHERE group_id = %d AND has_joined = 0",
-            $group_id
+            "SELECT user_id, NULL as email FROM wp_lef_groups_users 
+             WHERE group_id = %d AND has_joined = 0
+             UNION 
+             SELECT NULL as user_id, email FROM wp_lef_group_invites 
+             WHERE group_ID = %d",
+            $group_id, $group_id
         )
     );
 
@@ -382,29 +385,57 @@ function lef_show_group_users_shortcode( $atts ) {
     }
 
     if ($is_owner) {
+        global $post; // Get the current post
+        $group_id = $post->ID; // Assuming post ID represents the group ID
+    
         $output .= 
-        '<form id="lef_invite_user" method="post">
-            <label for="lef_invitve-user-input">Invite a friend</label><br>
-            <input type="text" class="lef_invitve-user-input" placeholder="friend'."'".'s email">
-            <button type="submit">send invite!</button>
+        '<form id="lef_invite_user" method="post" data-group-id="' . esc_attr($group_id) . '">
+            <label for="lef_invite-user-input">Invite a friend</label><br>
+            <input type="text" class="lef_invite-user-input" placeholder="friend'."'".'s email">
+            <button type="submit">Send invite!</button>
         </form>';
     }
+    
     
 
     // Show invited but not joined users
     if (!empty($invited_users)) {
         $output .= '<h3>Pending invites:</h3><ul>';
         foreach ($invited_users as $user) {
-            $user_info = get_userdata($user->user_id);
-            if ($user_info) {
-                $output .= '<li>' . esc_html($user_info->display_name) . '</li>';
+            if (!empty($user->user_id)) {
+                // User exists in the system but hasn't joined yet
+                $user_info = get_userdata($user->user_id);
+                if ($user_info) {
+                    $output .= '<li>' . esc_html($user_info->display_name) . ' (Pending)';
+                }
+                if ($is_owner) {
+                    $output .= 
+                        '<span style="margin-left: 30px; " 
+                            class="lef-delete-button" 
+                            data-type="remove_invite_existing_user" 
+                            data-user-id=" ' . esc_attr($user->user_id) . '" 
+                            data-group-id="' . esc_attr($group_id) . '"
+                            >❌</span>';
+                }
+            } elseif (!empty($user->email)) {
+                // User is invited but not registered
+                $output .= '<li>' . esc_html($user->email) . ' (No Account Yet)';
+                if ($is_owner) {
+                    $output .= 
+                        '<span style="margin-left: 30px; " 
+                            class="lef-delete-button" 
+                            data-type="remove_invite_unknown_user" 
+                            data-user-email="' . esc_attr($user->email) . '" 
+                            data-group-id="' . esc_attr($group_id) . '"
+                            >❌</span>';
+                }
             }
+            $output .= '</li>';
         }
         $output .= '</ul>';
-    } 
-
+    }
     $output .= '</div>';
-
+    
     return $output;
 }
 add_shortcode('lef_show_group_users', 'lef_show_group_users_shortcode');
@@ -476,13 +507,23 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
     if (empty($results)) {
         return '<p class="lef-no-wishlists">You have not added any wishlists to this group.</p>';
     }
-    $output = '<p>Your wishlists</p>';
+    $output = '<h3>Your wishlists</h3>';
     $output = '<ul class="lef-group-wishlists">';
+    
+    //fix styling here
     foreach ($results as $wishlist) {
-        $output .= '<li style="float: left; margin-right: 30px;"><a href="' . get_permalink($wishlist->ID) . '">' . 
-        esc_html($wishlist->post_title) . '</a>
-        </li>' .
-        '<span class="lef-delete-button" data-wishlist-id="'. esc_attr($wishlist->ID) . '" data-group-id="' . esc_attr($group_id) . '"data-type="remove_wishlist_from_group">❌</span>';
+        $output .= '<li">';
+        $output .= '<a href="' . get_permalink($wishlist->ID) . '">'; 
+        $output .= esc_html($wishlist->post_title);
+        $output .= '</a>';
+        $output .= '<span style="margin-left: 30px;"
+            class="lef-delete-button"
+            data-type="remove_wishlist_from_group"
+            data-wishlist-id="'. esc_attr($wishlist->ID) . '" 
+            data-group-id="' . esc_attr($group_id) . '"
+            >❌</span>';
+            //doesnt delete
+        $output .= '</li"><br>';
     }
     $output .= '</ul>';
 

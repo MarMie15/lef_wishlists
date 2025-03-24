@@ -9083,3 +9083,8 @@ function wp_is_heic_image_mime_type( $mime_type ) {
 
 	return in_array( $mime_type, $heic_mime_types, true );
 }
+
+function handle_failed_email($wp_error) {
+    error_log('Email sending failed: ' . print_r($wp_error, true));
+}
+add_action('wp_mail_failed', 'handle_failed_email');
