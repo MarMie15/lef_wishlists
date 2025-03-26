@@ -16,52 +16,37 @@ ul {
     padding-left: 0px;
 }
 
-.lef-box {
-    background-color: var(--lef-primary-color);
-    color: white;
-    padding: 15px;
-    border-radius: 5px;
-}
-
-.lef-button {
-    background-color: var(--lef-secondary-color);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 3px;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.lef-button:hover {
-    background-color: var(--lef-tertiary-color);
-}
-
-/* styling for shortcode lef_display_user_wishlists_shortcode */
-.lef-user-wishlist-item {
+/* Base shared styles for all list items */
+.lef-list-item {
     background-color: var(--lef-primary-color, #000000);
-    color: var(--lef-text-color, #ffffff);
+    color: white;
     padding: 10px 15px;
     border-radius: 5px;
     font-weight: bold;
-    display: inline-flex;
+    display: inline-flex; 
     align-items: center;
     justify-content: space-between;
-    position: relative; /* Ensures button is positioned inside without affecting width */
-    width: fit-content; /* Keeps width to only fit text */
+    position: relative;
+    width: fit-content;
     transition: padding-right 0.3s ease-in-out;
 }
 
-/* Wishlist Links */
-.lef-user-wishlist-item a {
+/* Links within the list item */
+.lef-list-item a {
     text-decoration: none;
     color: white;
     font-weight: bold;
     transition: text-decoration 0.2s ease, opacity 0.3s ease;
 }
 
-.lef-user-wishlist-item a:hover {
+.lef-list-item a:hover {
     text-decoration: underline;
     opacity: 0.8;
+}
+
+.display-block{
+    display: block;
+    margin-bottom: 4px;
 }
 
 /* Delete Button */
@@ -75,12 +60,12 @@ ul {
 }
 
 /* Expand space on hover */
-.lef-user-wishlist-item:hover {
+.has-delete-button:hover {
     padding-right: 45px;
 }
 
 /* Show Delete Button on Hover */
-.lef-user-wishlist-item:hover .lef-delete-button {
+.lef-list-item:hover .lef-delete-button {
     opacity: 1;
     transform: scale(1);
     pointer-events: auto; /* Enable clicks after animation */
@@ -89,7 +74,7 @@ ul {
 /* No Wishlists Message */
 .lef-no-wishlists {
     background-color: var(--lef-tertiary-color, #000000);
-    color: white;
+    color: var(--lef-text-color, #ffffff);
     padding: 10px;
     text-align: center;
     border-radius: 5px;

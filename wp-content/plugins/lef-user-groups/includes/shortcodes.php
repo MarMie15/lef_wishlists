@@ -171,7 +171,7 @@ function lef_display_user_wishlists_shortcode( $atts ) {
     // Build the output
     $output = '<ul class="lef-user-wishlists"> Wishlists:';
     foreach ($wishlists as $wishlist) {
-        $output .= '<li class="lef-user-wishlist-item">';
+        $output .= '<li class="lef-list-item lef-user-wishlist-item">';
         $output .= '<a href="' . get_permalink($wishlist->ID) . '">';
         $output .= esc_html($wishlist->post_title);
         $output .= '</a>';
@@ -285,7 +285,7 @@ function lef_display_user_groups_shortcode( $atts ) {
     // Build the output
     $output = '<ul class="lef-user-groups"> Groups:';
     foreach ($groups as $group) {
-        $output .= '<li class="lef-user-groups-item">';
+        $output .= '<li class="lef-list-item lef-user-groups-item">';
         $output .= '<a href="' . get_permalink($group->ID) . '">';
         $output .= esc_html($group->post_title);
         $output .= '</a>';
@@ -364,7 +364,7 @@ function lef_show_group_users_shortcode( $atts ) {
 
                 $user_display .= esc_html($user_info->display_name);
 
-                $output .= '<li>' . $user_display;
+                $output .= '<li class="lef-list-item display-block">' . $user_display;
 
                 //creates a delete button for any owner of the group
                 if ($is_owner && !$user->is_owner) {
@@ -405,7 +405,7 @@ function lef_show_group_users_shortcode( $atts ) {
                 // User exists in the system but hasn't joined yet
                 $user_info = get_userdata($user->user_id);
                 if ($user_info) {
-                    $output .= '<li>' . esc_html($user_info->display_name) . ' (Pending)';
+                    $output .= '<li class="lef-list-item display-block">' . esc_html($user_info->display_name) . ' (Pending)';
                 }
                 if ($is_owner) {
                     $output .= 
@@ -418,7 +418,7 @@ function lef_show_group_users_shortcode( $atts ) {
                 }
             } elseif (!empty($user->email)) {
                 // User is invited but not registered
-                $output .= '<li>' . esc_html($user->email) . ' (No Account Yet)';
+                $output .= '<li class="lef-list-item display-block">' . esc_html($user->email) . ' (No Account Yet)';
                 if ($is_owner) {
                     $output .= 
                         '<span style="margin-left: 30px; " 
@@ -511,7 +511,7 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
     
     //fix styling here
     foreach ($results as $wishlist) {
-        $output .= '<li">';
+        $output .= '<li class="lef-list-item">';
         $output .= '<a href="' . get_permalink($wishlist->ID) . '">'; 
         $output .= esc_html($wishlist->post_title);
         $output .= '</a>';

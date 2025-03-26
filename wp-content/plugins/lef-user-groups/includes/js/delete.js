@@ -1,4 +1,17 @@
 jQuery(document).ready(function($) {
+
+    //to check if a delete button exists for styling purposes
+    document.querySelectorAll('.lef-list-item').forEach(function(item) {
+        if (item.querySelector('.lef-delete-button')) {
+            // If no delete button exists, add the "has-delete-button" class
+            item.classList.add('has-delete-button');
+        } else {
+            // If the delete button exists, remove the "has-delete-button" class
+            item.classList.remove('has-delete-button');
+        }
+    });
+
+    //deletes the selected item on click based on the given data
     $(".lef-delete-button").on("click", function() {
         let deleteType = $(this).data('type');
         let itemID = $(this).data('id') || null;
