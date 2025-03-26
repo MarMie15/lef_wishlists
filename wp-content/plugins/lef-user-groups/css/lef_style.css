@@ -1,0 +1,112 @@
+/* lef-style.css */
+:root {
+    --lef-primary-color: #3498db;
+    --lef-secondary-color: #2ecc71;
+    --lef-tertiary-color: #e74c3c;
+    --lef-text-color: #ffffff;
+}
+
+/* my own darkmode */
+body{
+    background-color: #181a1b;
+    color: #ffffff;
+}
+
+ul {
+    padding-left: 0px;
+}
+
+.lef-box {
+    background-color: var(--lef-primary-color);
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.lef-button {
+    background-color: var(--lef-secondary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 3px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.lef-button:hover {
+    background-color: var(--lef-tertiary-color);
+}
+
+/* styling for shortcode lef_display_user_wishlists_shortcode */
+.lef-user-wishlist-item {
+    background-color: var(--lef-primary-color, #000000);
+    color: var(--lef-text-color, #ffffff);
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative; /* Ensures button is positioned inside without affecting width */
+    width: fit-content; /* Keeps width to only fit text */
+    transition: padding-right 0.3s ease-in-out;
+}
+
+/* Wishlist Links */
+.lef-user-wishlist-item a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    transition: text-decoration 0.2s ease, opacity 0.3s ease;
+}
+
+.lef-user-wishlist-item a:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+/* Delete Button */
+.lef-delete-button {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.5s ease-in, opacity 0.2s ease-out, transform 0.4s ease-in-out;
+    pointer-events: none; /* Disable clicks initially */
+    position: absolute;
+    right: 5px;
+}
+
+/* Expand space on hover */
+.lef-user-wishlist-item:hover {
+    padding-right: 45px;
+}
+
+/* Show Delete Button on Hover */
+.lef-user-wishlist-item:hover .lef-delete-button {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto; /* Enable clicks after animation */
+}
+
+/* No Wishlists Message */
+.lef-no-wishlists {
+    background-color: var(--lef-tertiary-color, #000000);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+
+/* color picker styling */
+.lef-color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.lef-color-picker-input {
+    width: 100px;
+    padding: 5px;
+    text-transform: uppercase;
+}
+

@@ -3,6 +3,14 @@
 if (!defined('ABSPATH')) exit;
 
 function lef_enqueue_scripts() {
+    // Enqueue the main plugin CSS file for the entire site
+    wp_enqueue_style(
+        'lef-main-style',
+        plugin_dir_url(__FILE__) . '../css/lef_style.css', // Adjust path if needed
+        array(), // No dependencies
+        null // No versioning, forces latest version
+    );
+
     // Enqueue groups.js only for group pages
     if (is_singular('lef_groepen')) {
         wp_enqueue_script(
@@ -58,24 +66,31 @@ function lef_enqueue_scripts() {
     wp_localize_script('lef-invites-js', 'lefInvitesData', array(
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
-    
 }
 add_action('wp_enqueue_scripts', 'lef_enqueue_scripts');
 
 function lef_admin_enqueue_scripts($hook) {
-    // Only load on the settings page
-    if ($hook !== 'toplevel_page_lef_settings') {
+    // Check the actual hook value
+    if ($hook !== 'lef-groups_page_lef_settings') {
+        error_log("Skipping script enqueue. Current page hook: " . $hook);
         return;
     }
 
-    // Enqueue WordPress color picker
     wp_enqueue_style('wp-color-picker');
-    wp_enqueue_script(
-        'lef-settings-js', 
-        plugin_dir_url(__FILE__) . 'js/settings.js', 
-        array('jquery', 'wp-color-picker'), 
-        null, 
-        true
-    );
+    wp_enqueue_script('wp-color-picker');
+
+    // Check if the file exists before enqueuing
+    $script_path = plugin_dir_path(__FILE__) . 'js/color-picker.js';
+    if (file_exists($script_path)) {
+        wp_enqueue_script(
+            'lef-color-picker-js', 
+            plugin_dir_url(__FILE__) . 'js/color-picker.js', 
+            array('jquery', 'wp-color-picker'), 
+            null, 
+            true
+        );
+    } else {
+        error_log("Error: color-picker.js not found at " . $script_path);
+    }
 }
 add_action('admin_enqueue_scripts', 'lef_admin_enqueue_scripts');

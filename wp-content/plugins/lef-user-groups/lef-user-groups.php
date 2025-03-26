@@ -377,3 +377,18 @@ function lef_process_invite_after_login($user_login, $user) {
     }
 }
 add_action('wp_login', 'lef_process_invite_after_login', 10, 2);
+
+function lef_add_custom_colors_to_head() {
+    $primary_color   = get_option('lef_primary_color', '#3498db');
+    $secondary_color = get_option('lef_secondary_color', '#2ecc71');
+    $tertiary_color  = get_option('lef_tertiary_color', '#e74c3c');
+
+    echo "<style>
+        :root {
+            --lef-primary-color: {$primary_color};
+            --lef-secondary-color: {$secondary_color};
+            --lef-tertiary-color: {$tertiary_color};
+        }
+    </style>";
+}
+add_action('wp_head', 'lef_add_custom_colors_to_head');

@@ -38,7 +38,7 @@ front-end:
 # -if user is logged in, show their groups, allow user to open the group by clicking on items
 
 # -make an options menu
---have multiple main colors
+# --have multiple main colors
 --start styling the shortcodes
 
 # backend:

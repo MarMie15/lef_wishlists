@@ -109,7 +109,6 @@ function lef_display_wishlist_items_shortcode($atts) {
         echo '</a>';
         echo '</li>';
         echo '<span class="lef-delete-button" data-type="delete_wishlist_item" data-wishlist-id="'. $wishlist_id . '" data-product-id="' . $product_id . '"> ❌ </span>';
-        // echo '<span class="lef-delete-button" data-id="' . esc_attr($product->ID) . '" data-type="delete_wishlist_item">❌</span>';
     }
 
     echo '</ul>';
@@ -172,12 +171,12 @@ function lef_display_user_wishlists_shortcode( $atts ) {
     // Build the output
     $output = '<ul class="lef-user-wishlists"> Wishlists:';
     foreach ($wishlists as $wishlist) {
-        $output .= '<li class="lef-user-wishlist-item" style="float: left; margin-right: 30px;">';
+        $output .= '<li class="lef-user-wishlist-item">';
         $output .= '<a href="' . get_permalink($wishlist->ID) . '">';
         $output .= esc_html($wishlist->post_title);
         $output .= '</a>';
-        $output .= '</li>';
         $output .= '<span class="lef-delete-button" data-id="' . esc_attr($wishlist->ID) . '" data-type="delete_wishlist">❌</span>';
+        $output .= '</li>';
     }
     $output .= '</ul>';
 
@@ -286,7 +285,7 @@ function lef_display_user_groups_shortcode( $atts ) {
     // Build the output
     $output = '<ul class="lef-user-groups"> Groups:';
     foreach ($groups as $group) {
-        $output .= '<li class="lef-user-wishlist-item">';
+        $output .= '<li class="lef-user-groups-item">';
         $output .= '<a href="' . get_permalink($group->ID) . '">';
         $output .= esc_html($group->post_title);
         $output .= '</a>';
