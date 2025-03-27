@@ -1,11 +1,4 @@
 /* lef-style.css */
-:root {
-    --lef-primary-color: #3498db;
-    --lef-secondary-color: #2ecc71;
-    --lef-tertiary-color: #e74c3c;
-    --lef-text-color: #ffffff;
-}
-
 /* my own darkmode */
 body{
     background-color: #181a1b;
@@ -16,10 +9,23 @@ ul {
     padding-left: 0px;
 }
 
+/* color picker styling */
+.lef-color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.lef-color-picker-input {
+    width: 100px;
+    padding: 5px;
+    text-transform: uppercase;
+}
+
 /* Base shared styles for all list items */
-.lef-list-item {
+.lef-list-item, .lef-form-item input, .lef-form-item button{
     background-color: var(--lef-primary-color, #000000);
-    color: white;
+    color: var(--lef-text-color, #ffffff);
     padding: 10px 15px;
     border-radius: 5px;
     font-weight: bold;
@@ -31,10 +37,16 @@ ul {
     transition: padding-right 0.3s ease-in-out;
 }
 
+.lef-form-item input{
+    background-color: var(--lef-secondary-color);
+    color: var(--lef-primary-color);
+
+}
+
 /* Links within the list item */
 .lef-list-item a {
     text-decoration: none;
-    color: white;
+    color: var(--lef-text-color);
     font-weight: bold;
     transition: text-decoration 0.2s ease, opacity 0.3s ease;
 }
@@ -73,7 +85,7 @@ ul {
 
 /* No Wishlists Message */
 .lef-no-wishlists {
-    background-color: var(--lef-tertiary-color, #000000);
+    background-color: var(--lef-primary-color, #000000);
     color: var(--lef-text-color, #ffffff);
     padding: 10px;
     text-align: center;
@@ -82,16 +94,93 @@ ul {
 }
 
 
-/* color picker styling */
-.lef-color-picker-container {
+
+
+
+//thorw new styling in
+
+/* Wishlist Items - Vertical List remains the same */
+.lef-wishlist-items {
+    list-style: none;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Individual Wishlist Item */
+.lef-wishlist-item {
+    display: flex;
+    align-items: center; /* Align image and text horizontally */
+    gap: 15px;
+    padding: 10px;
+    background: var(--lef-secondary-color);
+    border-radius: 8px;
+    transition: background 0.2s ease-in-out;
+    position: relative;
+}
+
+/* Hover Effect using "Tertiaire kleur" */
+.lef-wishlist-item:hover {
+    background: var(--lef-tertiary-color);
+}
+
+/* Image container (Left) */
+.lef-item-image {
+    width: 20%;
+    max-width: 80px;
+    flex-shrink: 0;
+}
+
+.lef-item-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+/* Item Details (Right) */
+.lef-item-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Takes remaining space */
     gap: 5px;
 }
 
-.lef-color-picker-input {
-    width: 100px;
-    padding: 5px;
-    text-transform: uppercase;
+/* Product Title (Black) */
+.lef-item-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
 }
 
+/* Product Price (lef-text-color) */
+.lef-item-price {
+    font-size: 14px;
+    color: var(--lef-text-color);
+    font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+
+/* to delete */
+.color1{
+    color: var(--lef-primary-color);
+}
+
+.color2{
+    color: var(--lef-secondary-color);
+}
+
+.color3{
+    color: var(--lef-tertiary-color);
+}
+
+.color4{
+    color: var(--lef-text-color);
+}

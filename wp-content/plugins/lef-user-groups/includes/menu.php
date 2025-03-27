@@ -120,6 +120,7 @@ function lef_register_settings() {
     register_setting('lef_settings_group', 'lef_secondary_color');
     register_setting('lef_settings_group', 'lef_tertiary_color');
     register_setting('lef_settings_group', 'lef_text_color');
+    register_setting('lef_settings_group', 'lef_font_color'); // New Font Color setting
 
     add_settings_section('lef_colors_section', 'Huisstijl Kleuren', null, 'lef_settings');
 
@@ -149,13 +150,13 @@ function lef_register_settings() {
         'lef_colors_section',
         array('option_name' => 'lef_tertiary_color')
     );
-    // Add Text Color Field
+    
     add_settings_field(
-        'lef_text_color', 
+        'lef_text_color',
         'Text kleur', 
         'lef_color_picker_callback',
         'lef_settings', 
-        'lef_colors_section', // Corrected this line
+        'lef_colors_section',
         array('option_name' => 'lef_text_color')
     );
 }
@@ -164,23 +165,26 @@ add_action('admin_init', 'lef_register_settings');
 // Callback function for color picker fields
 function lef_color_picker_callback($args) {
     $option_name = $args['option_name'];
-    $color_value = get_option($option_name, '#000000'); // Default to black
+    $color_value = get_option($option_name);
 
     echo '<input type="text" class="lef-color-picker" id="'. esc_attr($option_name) .'" name="' . esc_attr($option_name) . '" value="' . esc_attr($color_value) . '" />';
+    echo '<p>Current value: ' . esc_html($color_value) . '</p>'; // Debug output
 }
 
 // Add dynamic styles based on user-defined colors
 function lef_dynamic_styles() {
-    $primary = get_option('lef_primary_color', '#000000');
-    $secondary = get_option('lef_secondary_color', '#ffffff');
-    $tertiary = get_option('lef_tertiary_color', '#cccccc');
-    $text_color = get_option('lef_text_color', '#ffffff');
+    $primary = get_option('lef_primary_color', '#2594de');
+    $secondary = get_option('lef_secondary_color', '#15c75f');
+    $tertiary = get_option('lef_tertiary_color', '#cd3e2e');
+    $text = get_option('lef_text_color', '#ffd000');
 
     echo "<style>
-        .lef-primary { color: {$primary}; }
-        .lef-secondary { color: {$secondary}; }
-        .lef-tertiary { color: {$tertiary}; }
-        .lef_text { color: {$text_color};}
+        :root {
+            --lef-primary-color: {$primary};
+            --lef-secondary-color: {$secondary};
+            --lef-tertiary-color: {$tertiary};
+            --lef-text-color: {$text};
+        }
     </style>";
 }
 add_action('wp_head', 'lef_dynamic_styles');

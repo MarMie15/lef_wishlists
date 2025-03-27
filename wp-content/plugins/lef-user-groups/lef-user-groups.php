@@ -59,8 +59,8 @@ function lef_auto_append_shortcodes( $content ) {
         $wishlist_id = get_the_ID();
 
         // Append the wishlist form and wishlist items shortcodes.
-        $content .= do_shortcode( '[lef_add_product_to_wishlist wishlist_id="' . $wishlist_id . '"] <hr>' );
-        $content .= do_shortcode( '[lef_display_wishlist_items wishlist_id="' . $wishlist_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_add_product_to_wishlist wishlist_id="' . $wishlist_id . '"]' );
+        $content .= do_shortcode( '[lef_display_wishlist_items wishlist_id="' . $wishlist_id . '"] ' );
     }
 
     //attach the following shortcode's to single posts of lef_groepen

@@ -17,7 +17,7 @@ function lef_create_wishlist_submission_form() {
     // Form HTML
     ob_start();
     ?>
-    <form id="lef-wishlist-form" method="post">
+    <form id="lef-wishlist-form" class="lef-form-item" method="post">
         <input type="text" id="wishlist_title" placeholder="Create wishlist here!" name="wishlist_title" required>
         <input type="hidden" name="lef_wishlist_nonce" value="<?php echo wp_create_nonce('lef_wishlist_nonce'); ?>">
         <button type="submit">Create Wishlist</button>
@@ -101,17 +101,20 @@ function lef_display_wishlist_items_shortcode($atts) {
         $product_title = $product->get_name();
         $product_price = $product->get_price_html(); // Get formatted price
 
-        echo '<li class="lef-wishlist-item" >';
+        echo '<li class="lef-wishlist-item">';
         echo '<a href="' . esc_url($product_url) . '">';
-        echo $product_image ? $product_image : '<img src="' . esc_url(wc_placeholder_img_src()) . '" alt="No Image" style=height:50px;width:50px>';
-        echo '<span class="lef-wishlist-title">' . esc_html($product_title) . '</span>';
-        echo '<span class="lef-wishlist-price">' . wp_kses_post($product_price) . '</span>';
+        echo '<div class="lef-item-image">' . ($product_image ? $product_image : '<img src="' . esc_url(wc_placeholder_img_src()) . '" alt="No Image">') . '</div>';
+        echo '<div class="lef-item-details">';
+        echo '<span class="lef-item-title">' . esc_html($product_title) . '</span>';
+        echo '<span class="lef-item-price">' . wp_kses_post($product_price) . '</span>';
+        echo '</div>';
         echo '</a>';
-        echo '</li>';
         echo '<span class="lef-delete-button" data-type="delete_wishlist_item" data-wishlist-id="'. $wishlist_id . '" data-product-id="' . $product_id . '"> ❌ </span>';
-    }
+        echo '</li>';
+        }
 
     echo '</ul>';
+    echo '</div>';
 
     return ob_get_clean(); // Return the buffered output
 }
@@ -134,7 +137,7 @@ function lef_add_product_to_wishlist_form( $atts ) {
 
     ob_start();
     ?>
-    <div id="wishlist-form">
+    <div id="wishlist-form" class="lef-form-item" >
         <input type="text" id="wishlist-item-search" placeholder="Type to add product">
         <div id="wishlist-search-results"></div>
     </div>
@@ -200,7 +203,7 @@ function lef_create_group_submission_form() {
     // Form HTML
     ob_start();
     ?>
-    <form id="lef-group-form" method="post">
+    <form id="lef-group-form" class="lef-form-item" method="post">
         <input type="text" id="group_title" placeholder="Create group here!" name="group_title" required>
         <input type="hidden" name="lef_group_nonce" value="<?php echo wp_create_nonce('lef_group_nonce'); ?>">
         <button type="submit">Create Group</button>
@@ -388,15 +391,13 @@ function lef_show_group_users_shortcode( $atts ) {
         $group_id = $post->ID; // Assuming post ID represents the group ID
     
         $output .= 
-        '<form id="lef_invite_user" method="post" data-group-id="' . esc_attr($group_id) . '">
+        '<form id="lef_invite_user" class="lef-form-item" method="post" data-group-id="' . esc_attr($group_id) . '">
             <label for="lef_invite-user-input">Invite a friend</label><br>
             <input type="text" class="lef_invite-user-input" placeholder="friend'."'".'s email">
             <button type="submit">Send invite!</button>
         </form>';
     }
     
-    
-
     // Show invited but not joined users
     if (!empty($invited_users)) {
         $output .= '<h3>Pending invites:</h3><ul>';
@@ -459,7 +460,7 @@ function lef_add_wishlist_to_group_shortcode($atts) {
 
     ob_start();
     ?>
-    <div class="lef-add-group-wishlist">
+    <div class="lef-add-group-wishlist lef-form-item">
         <label for="group-wishlist-input">Add your wishlist to group:</label><br>
         <input type="text" id="group-wishlist-input" placeholder="Search your wishlists...">
         <ul id="group-wishlist-dropdown" class="lef-dropdown" style="display: none;"></ul>
@@ -507,7 +508,7 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
         return '<p class="lef-no-wishlists">You have not added any wishlists to this group.</p>';
     }
     $output = '<h3>Your wishlists</h3>';
-    $output = '<ul class="lef-group-wishlists">';
+    $output .= '<ul class="lef-group-wishlists">';
     
     //fix styling here
     foreach ($results as $wishlist) {
@@ -550,3 +551,16 @@ function lef_delete_group_button_shortcode() {
     return '<p id="lef-delete-group-button" class="lef-delete-button" data-type="delete_group" data-id="' . esc_attr($group_id) . '" class="lef-delete-button" >❌ Delete Group ❌</p>';
 }
 add_shortcode('lef_delete_group_button', 'lef_delete_group_button_shortcode');
+
+
+
+function lef_color_test_shortcode(){
+    $output = "";
+    $output .= '<p class="color1">bing</p>'.
+              '<p class="color2">bang</p>'.
+              '<p class="color3">boom</p>'.
+              '<p class="color4">bap</p>';
+              
+    return $output;
+}
+add_shortcode('lef_color_test','lef_color_test_shortcode');
