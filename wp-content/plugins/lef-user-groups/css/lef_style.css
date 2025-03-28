@@ -27,9 +27,10 @@ ul {
     background-color: var(--lef-primary-color, #000000);
     color: var(--lef-text-color, #ffffff);
     padding: 10px 15px;
+    margin-right: 5px;
     border-radius: 5px;
     font-weight: bold;
-    display: inline-flex; 
+    display: inline-block; 
     align-items: center;
     justify-content: space-between;
     position: relative;
@@ -59,10 +60,6 @@ ul {
 .display-block{
     display: block;
     margin-bottom: 4px;
-}
-
-.lef-group-wishlists li{
-    margin-right: 5px;
 }
 
 /* Delete Group Button - Styled Like a List Item but with Red Text */
@@ -108,7 +105,7 @@ ul {
 /* Show Delete Button on Hover */
 .lef-list-item:hover .lef-delete-button {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(0.8);
     pointer-events: auto; /* Enable clicks after animation */
 }
 

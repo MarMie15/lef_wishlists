@@ -508,7 +508,7 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
         return '<p class="lef-no-wishlists">You have not added any wishlists to this group.</p>';
     }
     $output = '<h3>Your wishlists</h3>';
-    $output .= '<ul class="lef-group-wishlists">';
+    $output .= '<ul>';
     
     //fix styling here
     foreach ($results as $wishlist) {
@@ -547,14 +547,6 @@ function lef_delete_group_button_shortcode() {
         return ''; // Don't display anything if the user is not an owner
     }
 
-    // return '<div id="lef-delete-group-button">
-    //             <ul>
-    //                 <li class="lef-list-item" style="color:red">❌ Delete Group ❌
-    //                     <span class="lef-delete-button" data-type="delete_group" data-id="' . esc_attr($group_id) . '" class="lef-delete-button" ></span>
-    //                 </li>
-    //             </ul>
-    //         </div>';
-
     return '<div id="lef-delete-group-container">
                 <ul>
                     <li class="lef-list-item lef-delete-group-button" 
@@ -570,7 +562,7 @@ add_shortcode('lef_delete_group_button', 'lef_delete_group_button_shortcode');
 
 
 function lef_color_test_shortcode(){
-    $output = "";
+    $output = "<p>selected colors: </p>";
     $output .= '<p class="color1">bing</p>'.
               '<p class="color2">bang</p>'.
               '<p class="color3">boom</p>'.

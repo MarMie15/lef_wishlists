@@ -56,6 +56,7 @@ var lefGroupWishlist = (function() {
                     let item = document.createElement('li');
                     item.textContent = wishlist.title;
                     item.dataset.id = wishlist.id;
+                    item.classList.add('lef-list-item');
                     dropdown.appendChild(item);
                 });
             }
