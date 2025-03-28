@@ -38,9 +38,10 @@ document.addEventListener("DOMContentLoaded", function() {
             
             // loop trough this for each product that it could find and display them
             result.data.forEach(product => {
-                const item = document.createElement("div");
+                const item = document.createElement("li");
                 item.textContent = product.name;
-                item.classList.add("wishlist-item"); // Add a class for styling
+                item.classList.add("lef-wishlist-item"); // Add a class for styling
+                // item.classList.add('your-class-name');
                 item.dataset.productId = product.id;
 
                 //calls another function which should add this item to the users wishlist

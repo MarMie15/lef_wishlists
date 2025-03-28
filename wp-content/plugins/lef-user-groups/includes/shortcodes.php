@@ -139,7 +139,7 @@ function lef_add_product_to_wishlist_form( $atts ) {
     ?>
     <div id="wishlist-form" class="lef-form-item" >
         <input type="text" id="wishlist-item-search" placeholder="Type to add product">
-        <div id="wishlist-search-results"></div>
+        <ul id="wishlist-search-results" class="lef-wishlist-items"></ul>
     </div>
     <?php
     return ob_get_clean();
