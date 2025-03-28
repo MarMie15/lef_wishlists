@@ -1,7 +1,7 @@
 jQuery(document).ready(function($) {
 
     //to check if a delete button exists for styling purposes
-    document.querySelectorAll('.lef-list-item').forEach(function(item) {
+    document.querySelectorAll('.lef-list-item, .lef-wishlist-item').forEach(function(item) {
         if (item.querySelector('.lef-delete-button')) {
             // If no delete button exists, add the "has-delete-button" class
             item.classList.add('has-delete-button');
@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
     });
 
     //deletes the selected item on click based on the given data
-    $(".lef-delete-button").on("click", function() {
+    $(".lef-delete-button, .lef-delete-group-button" ).on("click", function() {
         let deleteType = $(this).data('type');
         let itemID = $(this).data('id') || null;
         let groupID = $(this).data('group-id') || null;

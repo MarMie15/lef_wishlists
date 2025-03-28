@@ -522,8 +522,7 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
             data-wishlist-id="'. esc_attr($wishlist->ID) . '" 
             data-group-id="' . esc_attr($group_id) . '"
             >❌</span>';
-            //doesnt delete
-        $output .= '</li"><br>';
+        $output .= '</li">';
     }
     $output .= '</ul>';
 
@@ -548,7 +547,23 @@ function lef_delete_group_button_shortcode() {
         return ''; // Don't display anything if the user is not an owner
     }
 
-    return '<p id="lef-delete-group-button" class="lef-delete-button" data-type="delete_group" data-id="' . esc_attr($group_id) . '" class="lef-delete-button" >❌ Delete Group ❌</p>';
+    // return '<div id="lef-delete-group-button">
+    //             <ul>
+    //                 <li class="lef-list-item" style="color:red">❌ Delete Group ❌
+    //                     <span class="lef-delete-button" data-type="delete_group" data-id="' . esc_attr($group_id) . '" class="lef-delete-button" ></span>
+    //                 </li>
+    //             </ul>
+    //         </div>';
+
+    return '<div id="lef-delete-group-container">
+                <ul>
+                    <li class="lef-list-item lef-delete-group-button" 
+                        data-type="delete_group" 
+                        data-id="' . esc_attr($group_id) . '">
+                        ❌ Delete Group ❌
+                    </li>
+                </ul>
+            </div>';
 }
 add_shortcode('lef_delete_group_button', 'lef_delete_group_button_shortcode');
 
