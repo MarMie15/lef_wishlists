@@ -53,3 +53,10 @@ front-end:
 # - Custom post type maken genaamd "Groepen" 
 # - Users kunnen gekoppeld worden aan zo'n groep 
 # - Groepen moet de classic editor krijgen 
+
+
+-to do
+
+-make the email invites work 
+-make a page (like the acount page) with the groups, wishlists and such. accessable with a icon
+-remove the connection to the woocommerse products and make it more dynamic
