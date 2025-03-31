@@ -37,10 +37,6 @@ front-end:
 # -user should instantly be able to make a new group
 # -if user is logged in, show their groups, allow user to open the group by clicking on items
 
-# -make an options menu
-# --have multiple main colors
---start styling the shortcodes
-
 # backend:
 # -make table's for the groups and wishlists
 # -make sure database tables get created when installing plugin
@@ -56,8 +52,11 @@ front-end:
 
 
 -to do
+# -make an options menu
+# --have multiple main colors
+# --style the shortcodes
+# -adding a item to a wishlist now checks if this item is already in the wishlist
 
 -make the email invites work 
 -make a page (like the acount page) with the groups, wishlists and such. accessable with a icon
 -remove the connection to the woocommerse products and make it more dynamic
--adding a item to a wishlist does not check if this item is already in the wishlist
