@@ -38,7 +38,8 @@ function lef_enqueue_scripts() {
         // Pass necessary data (AJAX URL and Wishlist ID if available)
         wp_localize_script('lef-wishlist', 'lefWishlistData', array(
             'ajax_url'    => admin_url('admin-ajax.php'),
-            'wishlist_id' => intval(get_the_ID()) // Get current wishlist post ID
+            'wishlist_id' => intval(get_the_ID()), // Get current wishlist post ID
+            'placeholder_image' => wc_placeholder_img_src()
         ));
     }
     

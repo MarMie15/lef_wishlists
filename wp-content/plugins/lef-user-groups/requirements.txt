@@ -60,3 +60,4 @@ front-end:
 -make the email invites work 
 -make a page (like the acount page) with the groups, wishlists and such. accessable with a icon
 -remove the connection to the woocommerse products and make it more dynamic
+-adding a item to a wishlist does not check if this item is already in the wishlist

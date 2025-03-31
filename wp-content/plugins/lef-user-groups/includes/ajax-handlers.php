@@ -32,9 +32,24 @@ function lef_search_products() {
     $products = [];
     while ($query->have_posts()) {
         $query->the_post();
+        $product = wc_get_product(get_the_ID()); // Get WooCommerce product object
+
+        if (!$product) continue;
+
+        $regular_price = $product->get_regular_price();
+        $sale_price = $product->get_sale_price();
+        
+        // Format price: Strike-through regular price if there is a sale price
+        if ($sale_price && $sale_price < $regular_price) {
+            $formatted_price = '<del>' . wc_price($regular_price) . '</del> <ins>' . wc_price($sale_price) . '</ins>';
+        } else {
+            $formatted_price = wc_price($regular_price);
+        }        
         $products[] = [
-            'id'   => get_the_ID(),
-            'name' => get_the_title(),
+            'id'    => $product->get_id(),
+            'name'  => $product->get_name(),
+            'image' => get_the_post_thumbnail_url($product->get_id(), 'thumbnail') ?: wc_placeholder_img_src(),
+            'price' => $formatted_price
         ];
     }
     wp_reset_postdata();

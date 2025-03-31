@@ -39,17 +39,29 @@ document.addEventListener("DOMContentLoaded", function() {
             // loop trough this for each product that it could find and display them
             result.data.forEach(product => {
                 const item = document.createElement("li");
-                item.textContent = product.name;
-                item.classList.add("lef-wishlist-item"); // Add a class for styling
-                // item.classList.add('your-class-name');
-                item.dataset.productId = product.id;
+                item.classList.add("lef-wishlist-item"); // Add class for styling
+            
+                const productImage = product.image ? product.image : lefWishlistData.placeholder_image;
 
-                //calls another function which should add this item to the users wishlist
-                item.addEventListener("click", function() {
-                    addProductToWishlist(product.id, product.name);
+                
+                // Construct inner HTML to match your existing wishlist format
+                item.innerHTML = `
+                    <div class="lef-item-image">
+                        <img src="${productImage}" alt="image">
+                    </div>
+                    <div class="lef-item-details">
+                        <span class="lef-item-title">${product.name}</span>
+                        <span class="lef-item-price">${product.price}</span>
+                    </div>
+                `;
+            
+                // Add event listener to add item to wishlist when clicked
+                item.addEventListener("click", function(event) {
+                    if (!event.target.classList.contains("lef-delete-button")) {
+                        addProductToWishlist(product.id, product.name);
+                    }
                 });
-
-                //creates a div and puts it below the result box to show the items
+            
                 resultsContainer.appendChild(item);
             });
         } catch (error) {
