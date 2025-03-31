@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // Add event listener to add item to wishlist when clicked
                 item.addEventListener("click", function(event) {
                     if (!event.target.classList.contains("lef-delete-button")) {
-                        addProductToWishlist(product.id, product.name);
+                        addProductToWishlist(product.id);
                     }
                 });
             
@@ -69,9 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    function addProductToWishlist(productId, productName) {
-        alert(`The following has been added to your wishlist: ${productName}`);
-
+    function addProductToWishlist(productId) {
         const wishlistId = lefWishlistData.wishlist_id;
         if (!wishlistId) {
             console.error("Wishlist ID not found");
@@ -97,8 +95,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 location.reload(); // reload the page
             } else {
                 console.error("Failed to add product:", data);
+            alert("could not add item.");
             }
         })
-        .catch(error => console.error("Error in AJAX request:", error));
+        .catch(error => 
+            console.error("Error in AJAX request:", error));
     }
 });
