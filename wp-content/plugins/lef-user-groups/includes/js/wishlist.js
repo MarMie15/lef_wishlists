@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 location.reload(); // reload the page
             } else {
                 console.error("Failed to add product:", data);
-            alert("could not add item.");
+            alert("Product is already in the wishlist.");
             }
         })
         .catch(error => 
