@@ -53,33 +53,33 @@ jQuery(document).ready(function($) {
                 email: email,
                 group_id: groupID
             },
-            success: function(response) {   
-                if (response.success) {
-                    alert(response.data.message + "\n" + response.data.invite_link);
-                } else {
-                    alert("Error: " + response.data);
-                }
-                location.reload();
-            },
-            error: function() {
-                alert("Something went wrong.");
-            }
-            // beforeSend: function() {
-            //     emailInput.prop('disabled', true);
-            // },
-            // success: function(response) {
+            // success: function(response) {   
             //     if (response.success) {
-            //         alert("Invite sent successfully!");
+            //         alert(response.data.message + "\n" + response.data.invite_link);
             //     } else {
-            //         alert(response.data); // Show the returned error message
+            //         alert("Error: " + response.data);
             //     }
-            //     emailInput.val("").prop('disabled', false);
             //     location.reload();
             // },
-            // error: function(error) {
-            //     console.error("AJAX Error:", error);
-            //     emailInput.prop('disabled', false);
+            // error: function() {
+            //     alert("Something went wrong.");
             // }
+            beforeSend: function() {
+                emailInput.prop('disabled', true);
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert("Invite sent successfully!");
+                } else {
+                    alert(response.data); // Show the returned error message
+                }
+                emailInput.val("").prop('disabled', false);
+                location.reload();
+            },
+            error: function(error) {
+                console.error("AJAX Error:", error);
+                emailInput.prop('disabled', false);
+            }
         });        
     });
 });
