@@ -429,10 +429,14 @@ function lef_send_invite() {
             "SELECT id FROM $table_groups_users WHERE group_id = %d AND user_id = %d",
             $group_id, $user_id
         ));
-
+        
+//-------------------------------------------------------------------------------------------------------------------------
+        // checks if a user already exists
         if ($existing_user) {
             wp_send_json_error("This user is already a member of this group.");
         }
+        // uncomment again when email is correct
+//-------------------------------------------------------------------------------------------------------------------------
 
         // Generate an invite link for existing users
         $invite_link = site_url("/?join_group=$group_id&user_id=$user_id");

@@ -9,7 +9,7 @@
 if (!defined('ABSPATH')) exit;
 
 require_once plugin_dir_path(__FILE__) . 'includes/scripts.php';
-require_once plugin_dir_path(__FILE__) . 'includes/menu.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin-menu.php';
 require_once plugin_dir_path(__FILE__) . 'includes/database.php';
 require_once plugin_dir_path(__FILE__) . 'includes/shortcodes.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
@@ -392,3 +392,22 @@ function lef_add_custom_colors_to_head() {
     </style>";
 }
 add_action('wp_head', 'lef_add_custom_colors_to_head');
+
+
+register_activation_hook(__FILE__, 'lef_create_wishlist_page');
+function lef_create_wishlist_page() {
+    $page_title = 'LEF Wishlists';
+    $page_slug = 'lef-wishlists';
+
+    // Check if the page exists
+    $page = get_page_by_path($page_slug);
+    if (!$page) {
+        $page_id = wp_insert_post([
+            'post_title'    => $page_title,
+            'post_name'     => $page_slug,
+            'post_content'  => '[lef_wishlist_dashboard]', // Shortcode for content
+            'post_status'   => 'publish',
+            'post_type'     => 'page',
+        ]);
+    }
+}
