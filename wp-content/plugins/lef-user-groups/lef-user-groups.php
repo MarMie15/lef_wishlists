@@ -2,7 +2,7 @@
 /**
 * Plugin Name: LEF wishlist & groups system
 * Description: Custom system to allow users to make groups
-* Version: 1.0.7
+* Version: 1.0.8
 * Author: Marcel Miedema
 */
 
@@ -163,6 +163,7 @@ function lef_handle_existing_user_invite() {
             $_SESSION['invite_user_id'] = $user_id;
 
             // Redirect to the login page
+            //make sure the endpoint exists, its currently going to the woocommerce account
             wp_redirect(site_url("/index.php/my-account-2/"));
             exit;
         }
@@ -254,6 +255,8 @@ function lef_handle_new_user_invite() {
         $_SESSION['lef_invite_email'] = $invite->email;
         $_SESSION['lef_invite_group_id'] = $invite->group_id;
 
+        // Redirect to the login page        
+        //make sure the endpoint exists, its currently going to the woocommerce account
         wp_redirect(site_url("/index.php/my-account-2/"));
         exit;
     }
@@ -411,3 +414,33 @@ function lef_create_wishlist_page() {
         ]);
     }
 }
+
+function lef_create_groups_dashboard_page() {
+    $page_title = 'LEF Groups';
+    $page_slug = 'lef-groups';
+    $existing_page = get_page_by_title($page_title);
+
+    if ($existing_page) {
+        // If the page already exists, update the option
+        update_option('lef_groups_dashboard_page_id', $existing_page->ID);
+    } else {
+        // Create the page with the correct shortcode
+        $page_id = wp_insert_post(array(
+            'post_title'    => $page_title,
+            'post_content'  => '[lef_wishlist_dashboard]', // Keep shortcode unless changing it later
+            'post_status'   => 'publish',
+            'post_author'   => 1,
+            'post_type'     => 'page',
+            'post_name'     => $page_slug
+        ));
+
+        if ($page_id) {
+            update_option('lef_groups_dashboard_page_id', $page_id);
+        }
+    }
+
+    // Force a permalink flush so the URL works immediately
+    flush_rewrite_rules();
+}
+// Run function on plugin activation
+register_activation_hook(__FILE__, 'lef_create_groups_dashboard_page');

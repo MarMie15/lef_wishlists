@@ -559,9 +559,8 @@ function lef_delete_group_button_shortcode() {
 }
 add_shortcode('lef_delete_group_button', 'lef_delete_group_button_shortcode');
 
-// Register Shortcode
 function lef_wishlist_nav_button_shortcode() {
-    $wishlist_url = esc_url(site_url('/lef-wishlists/'));
+    $wishlist_url = esc_url(site_url('/lef-groups/'));
 
     return '<div class="menu-item lef-wishlist-nav">
                 <a href="' . $wishlist_url . '"><span class="dashicons dashicons-heart"></span></a>
