@@ -572,7 +572,7 @@ add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');
 
 
 
-//testing
+//testing selecting colors, delete later
 function lef_color_test_shortcode(){
     $output = "<p>selected colors: </p>";
     $output .= '<p class="color1">bing</p>'.
@@ -583,3 +583,91 @@ function lef_color_test_shortcode(){
     return $output;
 }
 add_shortcode('lef_color_test','lef_color_test_shortcode');
+
+
+//testing email styling, delete once done
+function lef_send_test_email() {
+    $to = "marcel@lefcreative.nl";
+    $subject = "LEF Creative - Styled Email Test";
+
+    // Fetch configurable colors from theme
+    $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d'); // Default green
+    $text_color = get_theme_mod('lef_text_color', '#ffffff'); // Default white
+    $hover_color = "#1a713e"; // Hover color for button
+
+    // Company logo (Change to your actual logo URL)
+    $logo_url = get_site_url() . "/wp-content/uploads/2024/04/lef-logo.png";
+
+    $message = "
+    <html>
+    <head>
+        <title>LEF Creative - Email Test</title>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; text-align: center; }
+            .email-container { background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+            .logo-container { background: $primary_color; padding: 15px; text-align: center; }
+            .logo-container img { height: 50px; }
+            .header { font-size: 22px; font-weight: bold; color: #333; margin-top: 15px; }
+            .content { margin-top: 10px; font-size: 16px; color: #555; padding: 10px; }
+            .footer { margin-top: 20px; font-size: 14px; color: #888; }
+            .button {
+                display: inline-block;
+                padding: 10px 20px;
+                margin-top: 15px;
+                background: $primary_color;
+                color: $text_color;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .button:hover {
+                background: $hover_color;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <div class='logo-container'>
+                <img src='$logo_url' alt='LEF Creative'>
+            </div>
+            <div class='header'>Welcome to LEF Creative!</div>
+            <div class='content'>
+                You've been invited to join a group on {websitename}
+                <br>
+                <a href='#' class='button'>Click Here to join!</a>
+                <br>
+                <p>This invite will expire in 7 days.</p>
+            </div>
+            <div class='footer'>Thank you for using LEF Creative.</div>
+        </div>
+    </body>
+    </html>";
+
+
+
+    $subject = "Join LEF Creative – You've Been Invited!";
+    $oldMessage =   "Hello,\n\n
+                    You've been invited to join a group on LEF Creative.\n\n
+                    Click the link below to register and accept the invite\n\n
+                    invite_link\n\n
+                    This invite will expire in 7 days.\n\n
+                    Best regards,
+                    \nLEF Creative Team";
+
+    // Email headers
+    $headers = [
+        'Content-Type: text/html; charset=UTF-8',
+        'From: LEF Creative <websites@lefcreative.nl>'
+    ];
+
+    // Send the email
+    // $sent = wp_mail($to, $subject, $message, $headers);
+
+    // Return response in WordPress
+    // return $sent ? "Test email sent successfully!" : "Failed to send test email.";
+
+    echo $message;
+}
+
+// Register shortcode
+add_shortcode('send_test_email', 'lef_send_test_email');

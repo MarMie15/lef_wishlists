@@ -457,7 +457,7 @@ function lef_send_invite() {
 
         wp_mail($email, $subject, $message, $headers);
 
-        wp_send_json_success(['message' => "Existing user added. Copy and share this link:"]);
+        wp_send_json_success(['message' => "User invited."]);
     } else {
         // New user logic (check invites first)
         $table_invites = $wpdb->prefix . "lef_group_invites";
@@ -493,7 +493,7 @@ function lef_send_invite() {
 
         wp_mail($email, $subject, $message, $headers);
 
-        wp_send_json_success(['message' => "New user invite created. Copy and share this link:"]);
+        wp_send_json_success(['message' => "New user invited"]);
     }
 }
 

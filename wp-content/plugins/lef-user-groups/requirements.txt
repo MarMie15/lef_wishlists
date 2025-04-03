@@ -1,10 +1,10 @@
 front-end:
 # -allow a user to create a group
 # -allow user to invite people to that group
---via email given by user, send invite to email
+# --via email given by user, send invite to email
 # ---check if user has already been invited
 # ---check if that user already exists via email 
----send email to invite person with invite
+# ---send email to invite person with invite
     # -if user doesnt exists yet, prompt to make account
     # -if user isnt logged in prompt to log in
     # -(new) user accepts the invite on click and goes to that group once logged in
@@ -27,8 +27,8 @@ front-end:
 # -make a roll system that makes the creator of the group the "owner"
 # --allow "owner" to delete the group
 # --allow "owner" to delete users
---to-discuss allow "owner" to make other users a "owner" aswell
 
+--to-discuss allow "owner" to make other users a "owner" aswell (approved by kris)
 -allow a owner to randomly assign a different users wishist to someone else
 
 # make sure a user can only access wishlists and groups they are a part of   //seems correct for now
@@ -55,6 +55,6 @@ front-end:
 # --style the shortcodes
 # -adding a item to a wishlist now checks if this item is already in the wishlist
 
--make the email invites work 
--make a page (like the acount page) with the groups, wishlists and such. accessable with a icon
+# -make the email invites work 
+# -make a page (like the acount page) with the groups, wishlists and such. accessable with a icon
 -remove the connection to the woocommerse products and make it more dynamic
