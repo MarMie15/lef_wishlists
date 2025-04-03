@@ -432,10 +432,10 @@ function lef_send_invite() {
         
 //-------------------------------------------------------------------------------------------------------------------------
         // checks if a user already exists
-        if ($existing_user) {
-            wp_send_json_error("This user is already a member of this group.");
-        }
-        // uncomment again when email is correct
+        // if ($existing_user) {
+        //     wp_send_json_error("This user is already a member of this group.");
+        // }
+        // uncomment again when once everything is final email is correct
 //-------------------------------------------------------------------------------------------------------------------------
 
         // Generate an invite link for existing users
@@ -449,12 +449,15 @@ function lef_send_invite() {
             'added_at'   => current_time('mysql')
         ]);
         
-        wp_send_json_success([
-            'message' => "Existing user added. Copy and share this link:",
-            'invite_link' => $invite_link
-        ]);
+        // Send email invite
+        $subject = "You've been invited to join a group on LEF Creative";
+        $message = "Hello,\n\nYou have been added to a group on LEF Creative.\n\nClick the link below to join:\n\n$invite_link\n\nBest regards,\nLEF Creative Team";
 
-        //add mailing functionality here later
+        $headers = ['Content-Type: text/plain; charset=UTF-8'];
+
+        wp_mail($email, $subject, $message, $headers);
+
+        wp_send_json_success(['message' => "Existing user added. Copy and share this link:"]);
     } else {
         // New user logic (check invites first)
         $table_invites = $wpdb->prefix . "lef_group_invites";
@@ -480,15 +483,17 @@ function lef_send_invite() {
             'invited_at'     => current_time('mysql')
         ]);
 
-        // Generate an invite link for new users
         $invite_link = site_url("/register/?token=$token&email=$email");
 
-        wp_send_json_success([
-            'message' => "New user invite created. Copy and share this link:",
-            'invite_link' => $invite_link
-        ]);
+        // Send email invite
+        $subject = "Join LEF Creative – You've Been Invited!";
+        $message = "Hello,\n\nYou've been invited to join a group on LEF Creative.\n\nClick the link below to register and accept the invite:\n\n$invite_link\n\nThis invite will expire in 7 days.\n\nBest regards,\nLEF Creative Team";
 
-        //add mailing functionality here later
+        $headers = ['Content-Type: text/plain; charset=UTF-8'];
+
+        wp_mail($email, $subject, $message, $headers);
+
+        wp_send_json_success(['message' => "New user invite created. Copy and share this link:"]);
     }
 }
 
