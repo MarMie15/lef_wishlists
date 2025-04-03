@@ -18,7 +18,7 @@ function lef_create_wishlist_submission_form() {
     ob_start();
     ?>
     <form id="lef-wishlist-form" class="lef-form-item" method="post">
-        <input type="text" id="wishlist_title" placeholder="Create wishlist here!" name="wishlist_title" required>
+        <input type="text" id="wishlist_title" placeholder="Wishlist name" name="wishlist_title" required>
         <input type="hidden" name="lef_wishlist_nonce" value="<?php echo wp_create_nonce('lef_wishlist_nonce'); ?>">
         <button type="submit">Create Wishlist</button>
     </form>
@@ -172,7 +172,7 @@ function lef_display_user_wishlists_shortcode( $atts ) {
     }
 
     // Build the output
-    $output = '<ul class="lef-user-wishlists"> Wishlists:';
+    $output = '<ul class="lef-user-wishlists">';
     foreach ($wishlists as $wishlist) {
         $output .= '<li class="lef-list-item lef-user-wishlist-item">';
         $output .= '<a href="' . get_permalink($wishlist->ID) . '">';
@@ -286,7 +286,7 @@ function lef_display_user_groups_shortcode( $atts ) {
     }
 
     // Build the output
-    $output = '<ul class="lef-user-groups"> Groups:';
+    $output = '<ul class="lef-user-groups">';
     foreach ($groups as $group) {
         $output .= '<li class="lef-list-item lef-user-groups-item">';
         $output .= '<a href="' . get_permalink($group->ID) . '">';
@@ -563,7 +563,7 @@ function lef_wishlist_nav_button_shortcode() {
     $wishlist_url = esc_url(site_url('/lef-groups/'));
 
     return '<div class="menu-item lef-wishlist-nav">
-                <a href="' . $wishlist_url . '"><span class="dashicons dashicons-heart"></span></a>
+                <a href="' . $wishlist_url . '"><span class="dashicons dashicons-list-view"></span></a>
             </div>';
 }
 add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');

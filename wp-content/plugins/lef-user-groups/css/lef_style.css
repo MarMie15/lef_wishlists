@@ -182,23 +182,66 @@ ul {
     color: black;
 }
 
-/* Product Price (lef-text-color) */
 .lef-item-price {
     font-size: 14px;
     color: var(--lef-text-color);
     font-weight: bold;
 }
 
-
-
-
-
-
 .lef-wishlist-nav a {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 12.5px;
     color: #fff;
+    text-decoration: none;
+}
+
+.lef-wishlist-nav .dashicons{
+    width: 25px;
+    height: 25px;
+    font-size: 25px;
+}
+
+.lef-invite-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Invite Tab Badge (New) */
+.lef-invite-tab-badge {
+    background-color: red;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 5px;
+    right: 35%;
+    transform: translateX(140%);
+}
+
+/* Ensure the Invite Tab is positioned relative */
+.lef-dashboard-menu li {
+    position: relative;
+    text-align: center; /* Ensures text stays centered under badge */
 }
 
 .lef-dashboard-menu ul {
@@ -206,21 +249,38 @@ ul {
     list-style: none;
     padding: 0;
     margin-bottom: 20px;
+    justify-content: space-between; /* Ensures equal spacing */
+    width: 100%; /* Ensures it takes full width */
+}
+
+.lef-dashboard-menu li {
+    flex-grow: 1; /* Makes each item take equal space */
+    text-align: center; /* Centers text inside each list item */
 }
 
 .lef-dashboard-menu a {
     text-decoration: none;
     font-weight: bold;
-    color: #333;
+    color: var(--lef-text-color);
+    display: block;
+    padding: 10px 0;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+.lef-dashboard-menu a.active {
+    color: var(--lef-primary-color);
+    background-color: var(--lef-tertiary-color);
+    border-radius: 5px;
 }
 
 .lef-dashboard-content {
-    border: 1px solid #ddd;
+
     padding: 15px;
 }
 
-
-
+.lef-dashboard-content li{
+    list-style-type: none;
+}
 
 
 

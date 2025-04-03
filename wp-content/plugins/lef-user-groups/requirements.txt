@@ -50,8 +50,6 @@ front-end:
 # - Users kunnen gekoppeld worden aan zo'n groep 
 # - Groepen moet de classic editor krijgen 
 
-
--to do
 # -make an options menu
 # --have multiple main colors
 # --style the shortcodes

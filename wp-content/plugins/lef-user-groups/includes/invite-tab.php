@@ -10,9 +10,27 @@ function lef_wishlist_dashboard_page() {
     ?>
     <div class="lef-dashboard-menu">
         <ul>
-            <li><a href="?tab=wishlists">Wishlists</a></li>
-            <li><a href="?tab=groups">Groups</a></li>
-            <li><a href="?tab=invites">Invites</a></li>
+            <li><a href="?tab=wishlists" class="<?php echo (isset($_GET['tab']) && $_GET['tab'] === 'wishlists') ? 'active' : ''; ?>">Wishlists</a></li>
+            <li><a href="?tab=groups" class="<?php echo (isset($_GET['tab']) && $_GET['tab'] === 'groups') ? 'active' : ''; ?>">Groups</a></li>
+            <li>
+                <a href="?tab=invites" class="<?php echo (isset($_GET['tab']) && $_GET['tab'] === 'invites') ? 'active' : ''; ?>">
+                    Invites 
+                    <?php
+                    if (!isset($_GET['tab']) || $_GET['tab'] !== 'invites') { // Only show badge if NOT on the invites tab
+                        global $wpdb;
+                        $user_id = get_current_user_id();
+                        $invite_count = $wpdb->get_var($wpdb->prepare("
+                            SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users 
+                            WHERE user_id = %d AND has_joined = 0
+                        ", $user_id));
+
+                        if ($invite_count > 0) {
+                            echo '<span class="lef-invite-tab-badge">' . esc_html($invite_count) . '</span>';
+                        }
+                    }
+                    ?>
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -35,21 +53,54 @@ function lef_wishlist_dashboard_page() {
 // Function to display wishlists
 function lef_display_wishlists() {
     echo '<h2>Your Wishlists</h2>';
-    // Placeholder for wishlist content
+    echo do_shortcode('[lef_create_wishlist_form]');
+    echo do_shortcode('[lef_display_user_wishlists]');
 }
 
 // Function to display groups
 function lef_display_groups() {
     echo '<h2>Your Groups</h2>';
-    // Placeholder for group content
+    echo do_shortcode('[lef_display_user_groups]');
 }
 
-// Function to display invites
+// Function to display invites in the LEF dashboard
 function lef_display_invites() {
-    echo '<h2>Your Invites</h2>';
-    // Placeholder for invite content
-}
+    if (!is_user_logged_in()) {
+        echo '<p>You must be logged in to view your invites.</p>';
+        return;
+    }
 
+    global $wpdb;
+    $user_id = get_current_user_id();
+
+    // Fetch invites where has_joined = 0
+    $query = $wpdb->prepare(
+        "SELECT p.ID, p.post_title 
+         FROM {$wpdb->prefix}lef_groups_users gu
+         JOIN {$wpdb->posts} p ON gu.group_ID = p.ID
+         WHERE gu.user_ID = %d 
+         AND gu.has_joined = 0
+         AND p.post_type = 'lef_groepen'
+         AND p.post_status = 'publish'",
+        $user_id
+    );
+
+    $invites = $wpdb->get_results($query);
+
+    if (empty($invites)) {
+        echo '<p>No pending invites.</p>';
+        return;
+    }
+
+    echo "<h2>You've been invited to:</h2>";
+    echo '<ul>';
+    foreach ($invites as $invite) {
+        echo '<li>' . esc_html($invite->post_title) . '<br>' .
+             '<a style="color: green; cursor: pointer;" class="lef-accept-invite" data-group-id="' . esc_attr($invite->ID) . '">[Accept]</a> 
+              <a style="color: red; cursor: pointer;" class="lef-decline-invite" data-group-id="' . esc_attr($invite->ID) . '">[Decline]</a></li>';
+    }
+    echo '</ul>';
+}
 
 // Shortcode to render the dashboard
 function lef_wishlist_dashboard_shortcode() {
@@ -58,57 +109,3 @@ function lef_wishlist_dashboard_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('lef_wishlist_dashboard', 'lef_wishlist_dashboard_shortcode');
-
-
-
-
-//code ot add a "group invites" tab to the woocommmerce my account tab
-// function lef_add_group_invites_tab($items) {
-//     $items['group-invites'] = __('Group Invites', 'text-domain');
-//     return $items;
-// }
-// add_filter('woocommerce_account_menu_items', 'lef_add_group_invites_tab');
-
-// function lef_register_group_invites_endpoint() {
-//     add_rewrite_endpoint('group-invites', EP_ROOT | EP_PAGES);
-// }
-// add_action('init', 'lef_register_group_invites_endpoint');
-
-// function lef_group_invites_content() {
-//     if (!is_user_logged_in()) {
-//         echo '<p>You must be logged in to view your invites.</p>';
-//         return;
-//     }
-
-//     global $wpdb;
-//     $user_id = get_current_user_id();
-
-//     // Fetch invites where has_joined = 0
-//     $query = $wpdb->prepare(
-//         "SELECT p.ID, p.post_title 
-//          FROM {$wpdb->prefix}lef_groups_users gu
-//          JOIN {$wpdb->posts} p ON gu.group_ID = p.ID
-//          WHERE gu.user_ID = %d 
-//          AND gu.has_joined = 0
-//          AND p.post_type = 'lef_groepen'
-//          AND p.post_status = 'publish'",
-//         $user_id
-//     );
-
-//     $invites = $wpdb->get_results($query);
-
-//     if (empty($invites)) {
-//         echo '<p>No pending invites.</p>';
-//         return;
-//     }
-
-//     echo "<p>you've been invited to:</p>";
-//     echo '<ul>';
-//     foreach ($invites as $invite) {
-//         echo '<li>' . esc_html($invite->post_title) . '</li>'.
-//              ' <a style="color: green;" href="#" class="lef-accept-invite" data-group-id=" '. esc_attr($invite->ID) .' ">[Accept]</a> 
-//                <a style="color: red;"   href="#" class="lef-decline-invite" data-group-id=" '. esc_attr($invite->ID) .' ">[Decline]</a></li>';
-//     }
-//     echo '</ul>';
-// }
-// add_action('woocommerce_account_group-invites_endpoint', 'lef_group_invites_content');

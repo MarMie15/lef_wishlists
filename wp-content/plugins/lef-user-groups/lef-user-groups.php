@@ -92,38 +92,19 @@ function lef_add_invite_notification_badge() {
         ?>
         <script>
         document.addEventListener("DOMContentLoaded", function () {
-            let accountButton = document.querySelector('[data-block-name="woocommerce/customer-account"]');
-            if (accountButton && !document.querySelector(".lef-invite-badge")) {
+            let inviteButton = document.querySelector('.lef-wishlist-nav a');
+            if (inviteButton && !document.querySelector(".lef-invite-badge")) {
                 let badge = document.createElement("span");
                 badge.textContent = "<?php echo $invite_count; ?>";
                 badge.classList.add("lef-invite-badge");
 
                 // Ensure the button wrapper is properly positioned
-                accountButton.style.position = "relative";
+                inviteButton.style.position = "relative";
 
-                accountButton.appendChild(badge);
+                inviteButton.appendChild(badge);
             }
         });
         </script>
-        <style>
-        .lef-invite-badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background-color: red;
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 10;
-        }
-        </style>
         <?php
     }
 }
