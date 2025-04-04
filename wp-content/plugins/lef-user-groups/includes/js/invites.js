@@ -53,17 +53,6 @@ jQuery(document).ready(function($) {
                 email: email,
                 group_id: groupID
             },
-            // success: function(response) {   
-            //     if (response.success) {
-            //         alert(response.data.message + "\n" + response.data.invite_link);
-            //     } else {
-            //         alert("Error: " + response.data);
-            //     }
-            //     location.reload();
-            // },
-            // error: function() {
-            //     alert("Something went wrong.");
-            // }
             beforeSend: function() {
                 emailInput.prop('disabled', true);
             },
