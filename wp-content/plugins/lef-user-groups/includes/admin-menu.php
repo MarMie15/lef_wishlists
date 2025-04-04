@@ -120,7 +120,8 @@ function lef_register_settings() {
     register_setting('lef_settings_group', 'lef_secondary_color');
     register_setting('lef_settings_group', 'lef_tertiary_color');
     register_setting('lef_settings_group', 'lef_text_color');
-    register_setting('lef_settings_group', 'lef_font_color'); // New Font Color setting
+    register_setting('lef_settings_group', 'lef_font_color');
+    register_setting('lef_settings_group', 'lef_logo_image');
 
     add_settings_section('lef_colors_section', 'Huisstijl Kleuren', null, 'lef_settings');
 
@@ -159,6 +160,14 @@ function lef_register_settings() {
         'lef_colors_section',
         array('option_name' => 'lef_text_color')
     );
+
+    add_settings_field(
+        'lef_logo_image',
+        'Logo image',
+        'lef_logo_image_callback',
+        'lef_settings',
+        'lef_colors_section'
+    );
 }
 add_action('admin_init', 'lef_register_settings');
 
@@ -188,3 +197,54 @@ function lef_dynamic_styles() {
     </style>";
 }
 add_action('wp_head', 'lef_dynamic_styles');
+
+function lef_logo_image_callback() {
+    $image_url = get_option('lef_logo_image');
+    echo '<input type="hidden" id="lef_logo_image" name="lef_logo_image" value="' . esc_attr($image_url) . '" />';
+    echo '<button type="button" class="button" id="upload_logo_button">Upload / Choose Image</button>';
+    
+    if ($image_url) {
+        echo '<div id="logo-preview" style="margin-top:10px;"><img src="' . esc_url($image_url) . '" style="max-height:100px;"></div>';
+    } else {
+        echo '<div id="logo-preview" style="margin-top:10px;"></div>';
+    }
+
+    // Enqueue WordPress media scripts
+    wp_enqueue_media();
+    ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const button = document.getElementById("upload_logo_button");
+            const preview = document.getElementById("logo-preview");
+            const input = document.getElementById("lef_logo_image");
+
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+                const customUploader = wp.media({
+                    title: "Select Logo Image",
+                    button: {
+                        text: "Use this image"
+                    },
+                    multiple: false
+                });
+
+                customUploader.on("select", function () {
+                    const attachment = customUploader.state().get("selection").first().toJSON();
+                    input.value = attachment.url;
+                    preview.innerHTML = `<img src="${attachment.url}" style="max-height:100px; padding">`;
+                });
+
+                customUploader.open();
+            });
+        });
+    </script>
+    <?php
+}
+
+
+
+//putting the logo somewhere
+// $logo = get_option('lef_logo_image');
+// if ($logo) {
+//     echo '<img src="' . esc_url($logo) . '" alt="Site Logo">';
+// }

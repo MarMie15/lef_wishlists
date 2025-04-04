@@ -403,6 +403,120 @@ function lef_handle_invite_action() {
 }
 add_action('wp_ajax_lef_handle_invite_action', 'lef_handle_invite_action');
 
+// Add this function before lef_send_invite():
+function lef_send_styled_invite_email($to, $subject, $invite_link, $logo_path, $image_cid) {
+    // Get theme colors
+    $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d');
+    $text_color = get_theme_mod('lef_text_color', '#ffffff');
+    $hover_color = get_theme_mod('lef_tertiary_color', "#1a713e");
+    $site_title = get_bloginfo('name');
+        
+    $message = "
+    <html>
+    <head>
+            <title>LEF Creative - Email Invite</title>
+            <style>
+                body { 
+                    font-family: Arial,
+                    sans-serif;
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                    text-align: center;
+                }
+    
+                .email-container {
+                    background: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+                    max-width: 600px;
+                    margin: auto;
+                }
+    
+                .logo-container { 
+                    background: $primary_color; 
+                    padding: 15px; 
+                    text-align: center; 
+                }
+    
+                .logo-container img { height: 50px; }
+    
+                .header { 
+                    font-size: 22px; 
+                    font-weight: bold; 
+                    color: #333; 
+                    margin-top: 15px; 
+                }
+    
+                .content { 
+                    margin-top: 10px; 
+                    font-size: 16px; 
+                    color: #555; 
+                    padding: 10px; 
+                }
+    
+                .footer { 
+                    margin-top: 20px; 
+                    font-size: 14px; 
+                    color: #888; 
+                }
+    
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin-top: 15px;
+                    background: $primary_color;
+                    color: $text_color;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                }
+                .button:hover {
+                    background: $hover_color;
+                }
+            </style>
+    </head>
+    <body>
+        <div class='email-container'>
+            <div class='logo-container'>
+                <img src='cid:$image_cid' alt='$site_title'>
+            </div>
+            <div class='header'>Welcome to $site_title!</div>
+            <div class='content'>
+                Someone has invited to join a group
+                <br>
+                <a href='$invite_link' class='button'>Click Here to join!</a>
+                <br>
+                <p>This invite will expire in 7 days.</p>
+            </div>
+            <div class='footer'>Thank you for using LEF Creative.</div>
+        </div>
+    </body>
+    </html>";
+    
+    $headers = ['Content-Type: text/html; charset=UTF-8', 'From: LEF Creative <websites@lefcreative.nl>'];
+    $attachments = array();
+        
+    if (file_exists($logo_path)) {
+        $attachments[] = $logo_path;
+        
+        add_action('phpmailer_init', function($phpmailer) use ($logo_path, $image_cid) {
+            $phpmailer->AddEmbeddedImage(
+                $logo_path,
+                $image_cid,
+                basename($logo_path),
+                'base64',
+                mime_content_type($logo_path)
+            );
+        });
+    }
+        
+    $sent = wp_mail($to, $subject, $message, $headers, $attachments);
+    remove_all_actions('phpmailer_init');
+        
+    return $sent;
+}
+
 function lef_send_invite() {
     if (!isset($_POST['email']) || !isset($_POST['group_id'])) {
         wp_send_json_error("Invalid request. Missing email or group ID.");
@@ -421,6 +535,32 @@ function lef_send_invite() {
     $table_groups_users = $wpdb->prefix . "lef_groups_users";
     $table_invites = $wpdb->prefix . "lef_group_invites";
 
+    // Fetch configurable colors from theme
+    $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d');
+    $text_color = get_theme_mod('lef_text_color', '#ffffff');
+    $hover_color = get_theme_mod('lef_tertiary_color', "#1a713e");
+    
+    // Get the logo URL from the options table
+    $logo_url = get_option('lef_logo_image');
+
+    // If no logo was set in the settings, use a default fallback
+    if (!$logo_url) {
+        $logo_url = get_site_url() . "/wp-content/uploads/2025/02/RDT_20250112_1217216191111379225706802.gif";
+    }
+
+    // Convert URL to server path for attachment
+    $uploads_dir = wp_upload_dir();
+    $site_url = $uploads_dir['baseurl'];
+    $site_dir = $uploads_dir['basedir'];
+
+    // Replace the site URL with the absolute server path
+    $logo_path = str_replace($site_url, $site_dir, $logo_url);
+    
+    $site_title = get_bloginfo('name');
+
+    // Generate a unique content ID for the image
+    $image_cid = md5(time()) . '@lefcreative.nl';
+    
     if ($user) {
         $user_id = $user->ID;
 
@@ -430,13 +570,10 @@ function lef_send_invite() {
             $group_id, $user_id
         ));
         
-//-------------------------------------------------------------------------------------------------------------------------
         // checks if a user already exists
-        // if ($existing_user) {
-        //     wp_send_json_error("This user is already a member of this group.");
-        // }
-        // uncomment again when once everything is final email is correct
-//-------------------------------------------------------------------------------------------------------------------------
+        if ($existing_user) {
+            wp_send_json_error("This user is already a member of this group.");
+        }
 
         // Generate an invite link for existing users
         $invite_link = site_url("/?join_group=$group_id&user_id=$user_id");
@@ -449,15 +586,125 @@ function lef_send_invite() {
             'added_at'   => current_time('mysql')
         ]);
         
-        // Send email invite
-        $subject = "You've been invited to join a group on LEF Creative";
-        $message = "Hello,\n\nYou have been added to a group on LEF Creative.\n\nClick the link below to join:\n\n$invite_link\n\nBest regards,\nLEF Creative Team";
+        $subject = "$site_title - You've been invited to a group!";
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
+        $message = "
+        <html>
+        <head>
+            <title>LEF Creative - Email Test</title>
+            <style>
+                body { 
+                    font-family: Arial,
+                    sans-serif;
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                    text-align: center;
+                }
+    
+                .email-container {
+                    background: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+                    max-width: 600px;
+                    margin: auto;
+                }
+    
+                .logo-container { 
+                    background: $primary_color; 
+                    padding: 15px; 
+                    text-align: center; 
+                }
+    
+                .logo-container img { height: 50px; }
+    
+                .header { 
+                    font-size: 22px; 
+                    font-weight: bold; 
+                    color: #333; 
+                    margin-top: 15px; 
+                }
+    
+                .content { 
+                    margin-top: 10px; 
+                    font-size: 16px; 
+                    color: #555; 
+                    padding: 10px; 
+                }
+    
+                .footer { 
+                    margin-top: 20px; 
+                    font-size: 14px; 
+                    color: #888; 
+                }
+    
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin-top: 15px;
+                    background: $primary_color;
+                    color: $text_color;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                }
+                .button:hover {
+                    background: $hover_color;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='logo-container'>
+                    <img src='cid:$image_cid' alt='$site_title'>
+                </div>
+                <div class='header'>Welcome to $site_title!</div>
+                <div class='content'>
+                    Someone has invited to join a group
+                    <br>
+                    <a href='$invite_link' class='button'>Click Here to join!</a>
+                    <br>
+                    <p>This invite will expire in 7 days.</p>
+                </div>
+                <div class='footer'>Thank you for using LEF Creative.</div>
+            </div>
+        </body>
+        </html>";
+    
+        // Attachments - add the logo as an attachment
+        $attachments = array();
+        
+        // Only proceed if the logo file exists
+        if (file_exists($logo_path)) {
+            $attachments[] = $logo_path;
+            
+            // Use PHPMailer to send the email with embedded image
+            add_action('phpmailer_init', function($phpmailer) use ($logo_path, $image_cid) {
+                // Add the embedded image
+                $phpmailer->AddEmbeddedImage(
+                    $logo_path,     // Path to the image
+                    $image_cid,     // Content ID (used in the HTML above)
+                    basename($logo_path), // Filename
+                    'base64',       // Encoding
+                    mime_content_type($logo_path) // MIME type
+                );
+            });
+        }
+        
+        // Send the email
+        wp_mail($email, $subject, $message, $headers, $attachments);
+        
+        // Remove our temporary phpmailer_init hook to avoid affecting other emails
+        remove_all_actions('phpmailer_init');
 
-        $headers = ['Content-Type: text/plain; charset=UTF-8'];
-
-        wp_mail($email, $subject, $message, $headers);
+        // old email invite
+        // $subject = "You've been invited to join a group on LEF Creative";
+        // $message = "Hello,\n\nYou have been added to a group on LEF Creative.\n\nClick the link below to join:\n\n$invite_link\n\nBest regards,\nLEF Creative Team";
+        // $headers = ['Content-Type: text/plain; charset=UTF-8'];
+        // wp_mail($email, $subject, $message, $headers);
 
         wp_send_json_success(['message' => "User invited."]);
+
     } else {
         // New user logic (check invites first)
         $table_invites = $wpdb->prefix . "lef_group_invites";
@@ -485,13 +732,123 @@ function lef_send_invite() {
 
         $invite_link = site_url("/register/?token=$token&email=$email");
 
-        // Send email invite
-        $subject = "Join LEF Creative – You've Been Invited!";
-        $message = "Hello,\n\nYou've been invited to join a group on LEF Creative.\n\nClick the link below to register and accept the invite:\n\n$invite_link\n\nThis invite will expire in 7 days.\n\nBest regards,\nLEF Creative Team";
+        $subject = "$site_title - You've been invited to a group!";
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
+        $message = "
+        <html>
+        <head>
+            <title>LEF Creative - Email Test</title>
+            <style>
+                body { 
+                    font-family: Arial,
+                    sans-serif;
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                    text-align: center;
+                }
+    
+                .email-container {
+                    background: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+                    max-width: 600px;
+                    margin: auto;
+                }
+    
+                .logo-container { 
+                    background: $primary_color; 
+                    padding: 15px; 
+                    text-align: center; 
+                }
+    
+                .logo-container img { height: 50px; }
+    
+                .header { 
+                    font-size: 22px; 
+                    font-weight: bold; 
+                    color: #333; 
+                    margin-top: 15px; 
+                }
+    
+                .content { 
+                    margin-top: 10px; 
+                    font-size: 16px; 
+                    color: #555; 
+                    padding: 10px; 
+                }
+    
+                .footer { 
+                    margin-top: 20px; 
+                    font-size: 14px; 
+                    color: #888; 
+                }
+    
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin-top: 15px;
+                    background: $primary_color;
+                    color: $text_color;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                }
+                .button:hover {
+                    background: $hover_color;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='logo-container'>
+                    <img src='cid:$image_cid' alt='$site_title'>
+                </div>
+                <div class='header'>Welcome to $site_title!</div>
+                <div class='content'>
+                    Someone has invited to join a group
+                    <br>
+                    <a href='$invite_link' class='button'>Click Here to join!</a>
+                    <br>
+                    <p>This invite will expire in 7 days.</p>
+                </div>
+                <div class='footer'>Thank you for using LEF Creative.</div>
+            </div>
+        </body>
+        </html>";
+    
+        // Attachments - add the logo as an attachment
+        $attachments = array();
+        
+        // Only proceed if the logo file exists
+        if (file_exists($logo_path)) {
+            $attachments[] = $logo_path;
+            
+            // Use PHPMailer to send the email with embedded image
+            add_action('phpmailer_init', function($phpmailer) use ($logo_path, $image_cid) {
+                // Add the embedded image
+                $phpmailer->AddEmbeddedImage(
+                    $logo_path,     // Path to the image
+                    $image_cid,     // Content ID (used in the HTML above)
+                    basename($logo_path), // Filename
+                    'base64',       // Encoding
+                    mime_content_type($logo_path) // MIME type
+                );
+            });
+        }
+        
+        // Send the email
+        wp_mail($email, $subject, $message, $headers, $attachments);
+        
+        // Remove our temporary phpmailer_init hook to avoid affecting other emails
+        remove_all_actions('phpmailer_init');
 
-        $headers = ['Content-Type: text/plain; charset=UTF-8'];
 
-        wp_mail($email, $subject, $message, $headers);
+        // old email invite
+        // $subject = "Join LEF Creative – You've Been Invited!";
+        // $message = "Hello,\n\nYou've been invited to join a group on LEF Creative.\n\nClick the link below to register and accept the invite:\n\n$invite_link\n\nThis invite will expire in 7 days.\n\nBest regards,\nLEF Creative Team";
+        // $headers = ['Content-Type: text/plain; charset=UTF-8'];
+        // wp_mail($email, $subject, $message, $headers);
 
         wp_send_json_success(['message' => "New user invited"]);
     }

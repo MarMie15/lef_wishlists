@@ -585,31 +585,92 @@ function lef_color_test_shortcode(){
 add_shortcode('lef_color_test','lef_color_test_shortcode');
 
 
+
+
+
+
+
+
 //testing email styling, delete once done
 function lef_send_test_email() {
-    $to = "marcel@lefcreative.nl";
-    $subject = "LEF Creative - Styled Email Test";
-
     // Fetch configurable colors from theme
-    $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d'); // Default green
-    $text_color = get_theme_mod('lef_text_color', '#ffffff'); // Default white
-    $hover_color = "#1a713e"; // Hover color for button
+    $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d');
+    $text_color = get_theme_mod('lef_text_color', '#ffffff');
+    $hover_color = get_theme_mod('lef_tertiary_color', "#1a713e");
+    
+    // Get the logo URL from the options table
+    $logo_url = get_option('lef_logo_image');
 
-    // Company logo (Change to your actual logo URL)
-    $logo_url = get_site_url() . "/wp-content/uploads/2024/04/lef-logo.png";
+    // If no logo was set in the settings, use a default fallback
+    if (!$logo_url) {
+        $logo_url = get_site_url() . "/wp-content/uploads/2025/02/RDT_20250112_1217216191111379225706802.gif";
+    }
 
+    // Convert URL to server path for attachment
+    $uploads_dir = wp_upload_dir();
+    $site_url = $uploads_dir['baseurl'];
+    $site_dir = $uploads_dir['basedir'];
+
+    // Replace the site URL with the absolute server path
+    $logo_path = str_replace($site_url, $site_dir, $logo_url);
+    
+    $site_title = get_bloginfo('name');
+    // Generate a unique content ID for the image
+    $image_cid = md5(time()) . '@lefcreative.nl';
+    
+    $to = "marcel@lefcreative.nl";
+    $subject = "$site_title - You've been invited to a group!";
+    
     $message = "
     <html>
     <head>
         <title>LEF Creative - Email Test</title>
         <style>
-            body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; text-align: center; }
-            .email-container { background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
-            .logo-container { background: $primary_color; padding: 15px; text-align: center; }
+            body { 
+                font-family: Arial,
+                sans-serif;
+                background-color: #f4f4f4;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .email-container {
+                background: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+                max-width: 600px;
+                margin: auto;
+            }
+
+            .logo-container { 
+                background: $primary_color; 
+                padding: 15px; 
+                text-align: center; 
+            }
+
             .logo-container img { height: 50px; }
-            .header { font-size: 22px; font-weight: bold; color: #333; margin-top: 15px; }
-            .content { margin-top: 10px; font-size: 16px; color: #555; padding: 10px; }
-            .footer { margin-top: 20px; font-size: 14px; color: #888; }
+
+            .header { 
+                font-size: 22px; 
+                font-weight: bold; 
+                color: #333; 
+                margin-top: 15px; 
+            }
+
+            .content { 
+                margin-top: 10px; 
+                font-size: 16px; 
+                color: #555; 
+                padding: 10px; 
+            }
+
+            .footer { 
+                margin-top: 20px; 
+                font-size: 14px; 
+                color: #888; 
+            }
+
             .button {
                 display: inline-block;
                 padding: 10px 20px;
@@ -628,11 +689,11 @@ function lef_send_test_email() {
     <body>
         <div class='email-container'>
             <div class='logo-container'>
-                <img src='$logo_url' alt='LEF Creative'>
+                <img src='cid:$image_cid' alt='$site_title'>
             </div>
-            <div class='header'>Welcome to LEF Creative!</div>
+            <div class='header'>Welcome to $site_title!</div>
             <div class='content'>
-                You've been invited to join a group on {websitename}
+                Someone has invited to join a group
                 <br>
                 <a href='#' class='button'>Click Here to join!</a>
                 <br>
@@ -643,30 +704,46 @@ function lef_send_test_email() {
     </body>
     </html>";
 
-
-
-    $subject = "Join LEF Creative – You've Been Invited!";
-    $oldMessage =   "Hello,\n\n
-                    You've been invited to join a group on LEF Creative.\n\n
-                    Click the link below to register and accept the invite\n\n
-                    invite_link\n\n
-                    This invite will expire in 7 days.\n\n
-                    Best regards,
-                    \nLEF Creative Team";
-
     // Email headers
     $headers = [
         'Content-Type: text/html; charset=UTF-8',
         'From: LEF Creative <websites@lefcreative.nl>'
     ];
-
+    
+    // Attachments - add the logo as an attachment
+    $attachments = array();
+    
+    // Only proceed if the logo file exists
+    if (file_exists($logo_path)) {
+        $attachments[] = $logo_path;
+        
+        // Use PHPMailer to send the email with embedded image
+        add_action('phpmailer_init', function($phpmailer) use ($logo_path, $image_cid) {
+            // Add the embedded image
+            $phpmailer->AddEmbeddedImage(
+                $logo_path,     // Path to the image
+                $image_cid,     // Content ID (used in the HTML above)
+                basename($logo_path), // Filename
+                'base64',       // Encoding
+                mime_content_type($logo_path) // MIME type
+            );
+        });
+    }
+    
+    // For testing in browser, display the message
+    if (isset($_GET['test_view']) && $_GET['test_view'] == 'email') {
+        echo $message;
+        exit;
+    }
+    
     // Send the email
-    // $sent = wp_mail($to, $subject, $message, $headers);
-
+    $sent = wp_mail($to, $subject, $message, $headers, $attachments);
+    
+    // Remove our temporary phpmailer_init hook to avoid affecting other emails
+    remove_all_actions('phpmailer_init');
+    
     // Return response in WordPress
-    // return $sent ? "Test email sent successfully!" : "Failed to send test email.";
-
-    echo $message;
+    return $sent ? "Test email sent successfully!" : "Failed to send test email.";
 }
 
 // Register shortcode

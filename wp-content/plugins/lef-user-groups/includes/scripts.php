@@ -80,18 +80,42 @@ function lef_admin_enqueue_scripts($hook) {
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script('wp-color-picker');
 
-    // Check if the file exists before enqueuing
+    // Enqueue your color picker script
     $script_path = plugin_dir_path(__FILE__) . 'js/color-picker.js';
     if (file_exists($script_path)) {
         wp_enqueue_script(
-            'lef-color-picker-js', 
-            plugin_dir_url(__FILE__) . 'js/color-picker.js', 
-            array('jquery', 'wp-color-picker'), 
-            null, 
+            'lef-color-picker-js',
+            plugin_dir_url(__FILE__) . 'js/color-picker.js',
+            array('jquery', 'wp-color-picker'),
+            null,
             true
         );
     } else {
         error_log("Error: color-picker.js not found at " . $script_path);
     }
+
+    // Inline script for unsaved changes warning
+    wp_add_inline_script('wp-color-picker', '
+        jQuery(document).ready(function($) {
+            let formChanged = false;
+            const form = $("form");
+
+            form.on("change input", "input, select, textarea", function() {
+                formChanged = true;
+            });
+
+            form.on("submit", function() {
+                formChanged = false;
+            });
+
+            window.addEventListener("beforeunload", function(e) {
+                if (formChanged) {
+                    e.preventDefault();
+                    e.returnValue = "";
+                }
+            });
+        });
+    ');
 }
+
 add_action('admin_enqueue_scripts', 'lef_admin_enqueue_scripts');

@@ -1,7 +1,1 @@
-[03-Apr-2025 13:45:31 UTC] Skipping script enqueue. Current page hook: wp-mail-smtp_page_wp-mail-smtp-tools
-[03-Apr-2025 13:45:39 UTC] Skipping script enqueue. Current page hook: toplevel_page_wp-mail-smtp
-[03-Apr-2025 13:45:44 UTC] Skipping script enqueue. Current page hook: toplevel_page_wp-mail-smtp
-[03-Apr-2025 13:45:48 UTC] Skipping script enqueue. Current page hook: toplevel_page_wp-mail-smtp
-[03-Apr-2025 13:51:37 UTC] Skipping script enqueue. Current page hook: site-editor.php
-[03-Apr-2025 13:51:49 UTC] Skipping script enqueue. Current page hook: site-editor.php
-[03-Apr-2025 13:53:12 UTC] Skipping script enqueue. Current page hook: site-editor.php
+[04-Apr-2025 13:33:53 UTC] PHP Warning:  Undefined variable $sent in C:\applications\xampp\htdocs\startthema\wp-content\plugins\lef-user-groups\includes\shortcodes.php on line 730
