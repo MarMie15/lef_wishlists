@@ -282,7 +282,15 @@ ul {
     list-style-type: none;
 }
 
+.lef-group-users-head{
+    display: flex;
+    justify-content: space-between;
+}
 
+.lef-group-users-head *{
+    margin: 0px;
+    align-content: center;
+}
 
 
 

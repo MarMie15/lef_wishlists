@@ -71,6 +71,7 @@ function lef_auto_append_shortcodes( $content ) {
         $content .= do_shortcode( '[lef_show_group_users groepen_id="' . $groepen_id . '"]	<hr>' );
         $content .= do_shortcode( '[lef_add_wishlist_to_group group_id="' . $groepen_id . '"] <hr>' );
         $content .= do_shortcode( '[lef_display_group_wishlists groepen_id="' . $groepen_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_leave_group_button groepen_id="' . $groepen_id . '"] <hr>' );
         $content .= do_shortcode( '[lef_delete_group_button groepen_id="' . $groepen_id . '"]' );
     }
     return $content;

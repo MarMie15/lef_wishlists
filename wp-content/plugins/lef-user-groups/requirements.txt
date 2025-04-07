@@ -1,4 +1,4 @@
-front-end:
+# front-end:
 # -allow a user to create a group
 # -allow user to invite people to that group
 # --via email given by user, send invite to email
@@ -28,8 +28,7 @@ front-end:
 # --allow "owner" to delete the group
 # --allow "owner" to delete users
 
--leave group button for user
-
+# -leave group button for user
 --to-discuss allow "owner" to make other users a "owner" aswell (approved by kris)
 -allow a owner to randomly assign a different users wishist to someone else
 
