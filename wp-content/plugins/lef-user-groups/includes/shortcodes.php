@@ -530,6 +530,22 @@ add_shortcode('lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_shortcode'
 }
 add_shortcode('lef_display_group_wishlists', 'lef_display_group_wishlists_shortcode');
 
+function lef_leave_group_button_shortcode() {
+    $group_id = get_the_ID();
+    $user_id = get_current_user_id();
+
+    return '<div id="lef-delete-group-container">
+                <ul>
+                    <li class="lef-list-item lef-delete-group-button" 
+                        data-type="delete_user_from_group" 
+                        data-group-id="' . esc_attr($group_id) . '"
+                        data-user-id="'. esc_attr($user_id).'"
+                        >Leave group
+                    </li>
+                </ul>
+            </div>';
+}
+
 function lef_delete_group_button_shortcode() {
     global $wpdb;
 
@@ -542,9 +558,10 @@ function lef_delete_group_button_shortcode() {
         $group_id,
         $user_id
     ));
-
+    
+    // Don't display anything if the user is not an owner
     if (!$is_owner) {
-        return ''; // Don't display anything if the user is not an owner
+        return '';
     }
 
     return '<div id="lef-delete-group-container">
@@ -572,6 +589,9 @@ add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');
 
 
 
+
+
+//---------testing---------testing---------testing---------testing---------testing---------testing---------testing---------testing---------testing---------
 //testing selecting colors, delete later
 function lef_color_test_shortcode(){
     $output = "<p>selected colors: </p>";
@@ -584,14 +604,7 @@ function lef_color_test_shortcode(){
 }
 add_shortcode('lef_color_test','lef_color_test_shortcode');
 
-
-
-
-
-
-
-
-//testing email styling, delete once done
+//testing email styling
 function lef_send_test_email() {
     // Fetch configurable colors from theme
     $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d');
@@ -737,13 +750,13 @@ function lef_send_test_email() {
     }
     
     // Send the email
-    $sent = wp_mail($to, $subject, $message, $headers, $attachments);
+    // $sent = wp_mail($to, $subject, $message, $headers, $attachments);
     
     // Remove our temporary phpmailer_init hook to avoid affecting other emails
     remove_all_actions('phpmailer_init');
     
     // Return response in WordPress
-    return $sent ? "Test email sent successfully!" : "Failed to send test email.";
+    // return $sent ? "Test email sent successfully!" : "Failed to send test email.";
 }
 
 // Register shortcode
