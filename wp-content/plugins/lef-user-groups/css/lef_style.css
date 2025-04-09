@@ -1,8 +1,15 @@
 /* lef-style.css */
 /* my own darkmode */
 body{
-    background-color: #181a1b; 
-     color: #ffffff;
+    background-color: #181a1b !important;
+     color: #ffffff !important;
+}
+
+/* Make SVG icon inherit color from parent */
+.lef-icon {
+    width: 25px;
+    height: 25px;
+    fill: currentColor; /* This makes it inherit color from parent text color */
 }
 
 ul {
@@ -109,6 +116,11 @@ ul {
     pointer-events: auto; /* Enable clicks after animation */
 }
 
+/* Hide delete buttons when in owner selection mode */
+.selecting-owner-mode .lef-delete-button {
+    display: none !important;
+}
+
 /* No Wishlists Message */
 .lef-no-wishlists {
     background-color: var(--lef-primary-color, #000000);
@@ -192,7 +204,6 @@ ul {
     display: flex;
     align-items: center;
     padding: 12.5px;
-    color: #fff;
     text-decoration: none;
 }
 

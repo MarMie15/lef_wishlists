@@ -20,9 +20,13 @@ jQuery(document).ready(function($) {
         if (selectMode) {
             // Enable selection mode
             addOwnerBtn.text("Cancel").addClass("lef-cancel-btn");
-            $(".lef-group-users h3, .lef-form-item, .lef-owner-user, h3:contains('Pending invites'), h3 + ul").addClass("lef-dimmed");
+            $(".lef-group-users h3, .lef-form-item, .lef-owner-user, .lef-delete-group-button, h3:contains('Pending invites'), h3:contains('Your wishlists'), h3 + ul").addClass("lef-dimmed");
             userItems.addClass("lef-highlight");
             
+            //stops the delete button x and styling from applying
+            $(".has-delete-button").removeClass("has-delete-button");
+            $(".lef-delete-button").parent().addClass("selecting-owner-mode");
+
             // Add click handlers to non-owner users
             userItems.on("click", handleUserSelection);
         } else {
@@ -38,9 +42,13 @@ jQuery(document).ready(function($) {
     
     function resetUI() {
         // Reset all UI elements
-        addOwnerBtn.text("Add owner").removeClass("lef-cancel-btn");
         $(".lef-dimmed").removeClass("lef-dimmed");
+        addOwnerBtn.text("Add owner").removeClass("lef-cancel-btn");
         userItems.removeClass("lef-highlight").off("click");
+
+        $(".lef-delete-button").parent().addClass("has-delete-button");
+        $(".selecting-owner-mode").removeClass("selecting-owner-mode");
+
         selectedUserId = null;
         selectMode = false;
     }

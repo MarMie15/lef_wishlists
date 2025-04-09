@@ -378,10 +378,8 @@ function lef_show_group_users_shortcode( $atts ) {
                 
                 $user_display .= esc_html($user_info->display_name);
 
-                // $output .= '<li class="lef-list-item display-block">' . $user_display;
                 $output .= '<li class="lef-list-item display-block ' . $owner_class . '" 
                 data-user-id="' . esc_attr($user_info->ID) . '">' . $user_display;
-
 
                 //creates a delete button for any owner of the group
                 if ($is_owner && !$user->is_owner) {
@@ -407,7 +405,7 @@ function lef_show_group_users_shortcode( $atts ) {
         $output .= 
         '<form id="lef_invite_user" class="lef-form-item" method="post" data-group-id="' . esc_attr($group_id) . '">
             <label for="lef_invite-user-input">Invite a friend</label><br>
-            <input type="text" class="lef_invite-user-input" placeholder="friend'."'".'s email">
+            <input type="text" class="lef_invite-user-input" placeholder="friend\'s email">
             <button type="submit">Send invite!</button>
         </form>';
     }
@@ -449,7 +447,7 @@ function lef_show_group_users_shortcode( $atts ) {
         $output .= '</ul>';
     }
 
-    // Add confirmation
+    // Add confirmation modal for owners
     if ($is_owner) {
         $output .= '
         <div id="lef-confirm-modal" style="display: none;" class="lef-modal">
@@ -608,11 +606,13 @@ add_shortcode('lef_delete_group_button', 'lef_delete_group_button_shortcode');
 
 function lef_wishlist_nav_button_shortcode() {
     $wishlist_url = esc_url(site_url('/lef-groups/'));
-
-    // dashicon only works for admins, use something else
-    // img path does not work
+    
     return '<div class="menu-item lef-wishlist-nav">
-                <a href="' . $wishlist_url . '"><img src="../img/iconmonstr-tiles-list-lined-240.png" alt="icon"></a>
+                <a href="' . $wishlist_url . '">
+                    <svg class="lef-icon" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m10.5 17.25c0-.414.336-.75.75-.75h10c.414 0 .75.336.75.75s-.336.75-.75.75h-10c-.414 0-.75-.336-.75-.75zm-1.5-3.55c0-.53-.47-1-1-1h-5c-.53 0-1 .47-1 1v4.3c0 .53.47 1 1 1h5c.53 0 1-.47 1-1zm-5.5.5h4v3.3h-4zm7-2.2c0-.414.336-.75.75-.75h10c.414 0 .75.336.75.75s-.336.75-.75.75h-10c-.414 0-.75-.336-.75-.75zm-1.5-6c0-.53-.47-1-1-1h-5c-.53 0-1 .47-1 1v4.3c0 .53.47 1 1 1h5c.53 0 1-.47 1-1zm-5.5.5h4v3.3h-4zm7 .25c0-.414.336-.75.75-.75h10c.414 0 .75.336.75.75s-.336.75-.75.75h-10c-.414 0-.75-.336-.75-.75z" fill-rule="nonzero"/>
+                    </svg>
+                </a>
             </div>';
 }
 add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');
