@@ -362,7 +362,7 @@ function lef_show_group_users_shortcode( $atts ) {
         }
 
         $output .= '</div>'; 
-        $output .= '<ul>';
+        $output .= '<ul id="lef-user-list">';
         foreach ($joined_users as $user) {
             $user_info = get_userdata($user->user_id);
             if ($user_info) {
@@ -371,11 +371,17 @@ function lef_show_group_users_shortcode( $atts ) {
 
                 if ($user->is_owner) {
                     $user_display .= '👑 ';
+                    $owner_class = 'lef-owner-user';
+                }else{
+                    $owner_class = 'lef-regular-user';
                 }
                 
                 $user_display .= esc_html($user_info->display_name);
 
-                $output .= '<li class="lef-list-item display-block">' . $user_display;
+                // $output .= '<li class="lef-list-item display-block">' . $user_display;
+                $output .= '<li class="lef-list-item display-block ' . $owner_class . '" 
+                data-user-id="' . esc_attr($user_info->ID) . '">' . $user_display;
+
 
                 //creates a delete button for any owner of the group
                 if ($is_owner && !$user->is_owner) {
@@ -442,6 +448,113 @@ function lef_show_group_users_shortcode( $atts ) {
         }
         $output .= '</ul>';
     }
+
+    // Add confirmation
+    if ($is_owner) {
+        $output .= '
+        <div id="lef-confirm-modal" style="display: none;" class="lef-modal">
+            <div class="lef-modal-content">
+                <p>Are you sure you want to make this user an owner?</p>
+                <div class="lef-modal-actions">
+                    <button id="lef-confirm-yes" class="lef-list-item">Yes</button>
+                    <button id="lef-confirm-no" class="lef-list-item">No</button>
+                </div>
+            </div>
+        </div>';
+    }
+    
+    // Add the CSS and JavaScript for owner management if the user is an owner
+    if ($is_owner) {
+        $output .= '
+        <script>
+        jQuery(document).ready(function($) {
+            let selectMode = false;
+            let selectedUserId = null;
+            const groupId = ' . $group_id . ';
+            const addOwnerBtn = $("#lef-add-owner-btn");
+            const userItems = $(".lef-regular-user");
+            const ownerItems = $(".lef-owner-user");
+            const modalConfirm = $("#lef-confirm-modal");
+            const confirmYes = $("#lef-confirm-yes");
+            const confirmNo = $("#lef-confirm-no");
+            
+            // Initialize event listeners
+            addOwnerBtn.on("click", toggleSelectMode);
+            
+            function toggleSelectMode() {
+                selectMode = !selectMode;
+                
+                if (selectMode) {
+                    // Enable selection mode
+                    addOwnerBtn.text("Cancel").addClass("lef-cancel-btn");
+                    $(".lef-group-users h3, .lef-form-item, .lef-owner-user, h3:contains(\'Pending invites\'), h3 + ul").addClass("lef-dimmed");
+                    userItems.addClass("lef-highlight");
+                    
+                    // Add click handlers to non-owner users
+                    userItems.on("click", handleUserSelection);
+                } else {
+                    // Disable selection mode
+                    resetUI();
+                }
+            }
+            
+            function handleUserSelection() {
+                selectedUserId = $(this).data("user-id");
+                modalConfirm.show();
+            }
+            
+            function resetUI() {
+                // Reset all UI elements
+                addOwnerBtn.text("Add owner").removeClass("lef-cancel-btn");
+                $(".lef-dimmed").removeClass("lef-dimmed");
+                userItems.removeClass("lef-highlight").off("click");
+                selectedUserId = null;
+                selectMode = false;
+            }
+            
+            // Handle confirmation dialog
+            confirmYes.on("click", function() {
+                if (selectedUserId) {
+                    promoteToOwner(selectedUserId);
+                }
+                modalConfirm.hide();
+            });
+            
+            confirmNo.on("click", function() {
+                modalConfirm.hide();
+                // Don\'t reset UI so they can pick another user
+            });
+            
+            function promoteToOwner(userId) {
+                $.ajax({
+                    url: "' . admin_url('admin-ajax.php') . '",
+                    type: "POST",
+                    data: {
+                        action: "lef_promote_to_owner",
+                        user_id: userId,
+                        group_id: groupId,
+                        security: "' . wp_create_nonce('lef-owner-nonce') . '"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Refresh the page to show updated owners
+                            location.reload();
+                        } else {
+                            console.error("Error promoting user:", response.data.message);
+                            alert("Error: " + response.data.message);
+                            resetUI();
+                        }
+                    },
+                    error: function() {
+                        alert("An error occurred. Please try again.");
+                        resetUI();
+                    }
+                });
+            }
+        });
+        </script>';
+    }
+
     $output .= '</div>';
     
     return $output;
@@ -589,8 +702,9 @@ function lef_wishlist_nav_button_shortcode() {
     $wishlist_url = esc_url(site_url('/lef-groups/'));
 
     // dashicon only works for admins, use something else
+    // img path does not work
     return '<div class="menu-item lef-wishlist-nav">
-                <a href="' . $wishlist_url . '"><span class="dashicons"><svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m10.5 17.25c0-.414.336-.75.75-.75h10c.414 0 .75.336.75.75s-.336.75-.75.75h-10c-.414 0-.75-.336-.75-.75zm-1.5-3.55c0-.53-.47-1-1-1h-5c-.53 0-1 .47-1 1v4.3c0 .53.47 1 1 1h5c.53 0 1-.47 1-1zm-5.5.5h4v3.3h-4zm7-2.2c0-.414.336-.75.75-.75h10c.414 0 .75.336.75.75s-.336.75-.75.75h-10c-.414 0-.75-.336-.75-.75zm-1.5-6c0-.53-.47-1-1-1h-5c-.53 0-1 .47-1 1v4.3c0 .53.47 1 1 1h5c.53 0 1-.47 1-1zm-5.5.5h4v3.3h-4zm7 .25c0-.414.336-.75.75-.75h10c.414 0 .75.336.75.75s-.336.75-.75.75h-10c-.414 0-.75-.336-.75-.75z" fill-rule="nonzero"/></svg></span></a>
+                <a href="' . $wishlist_url . '"><img src="../img/iconmonstr-tiles-list-lined-240.png" alt="icon"></a>
             </div>';
 }
 add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');
