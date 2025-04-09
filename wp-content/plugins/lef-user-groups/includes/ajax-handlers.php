@@ -672,3 +672,67 @@ function lef_send_invite() {
 
 add_action('wp_ajax_lef_send_invite', 'lef_send_invite');
 add_action('wp_ajax_nopriv_lef_send_invite', 'lef_send_invite');
+
+function lef_promote_to_owner_handler() {
+    // Verify nonce for security
+    if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'lef-owner-nonce')) {
+        wp_send_json_error(['message' => 'Security check failed']);
+    }
+    
+    global $wpdb;
+    $current_user_id = get_current_user_id();
+    
+    // Check if required parameters are provided
+    if (!isset($_POST['user_id']) || !isset($_POST['group_id'])) {
+        wp_send_json_error(['message' => 'Missing required parameters']);
+    }
+    
+    $user_id = intval($_POST['user_id']);
+    $group_id = intval($_POST['group_id']);
+    
+    // Check if current user is an owner of the group
+    $is_owner = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_id = %d AND user_id = %d AND is_owner = 1",
+            $group_id,
+            $current_user_id
+        )
+    );
+    
+    if (!$is_owner) {
+        wp_send_json_error(['message' => 'You do not have permission to modify owners']);
+    }
+    
+    // Check if target user exists in the group
+    $user_exists = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_id = %d AND user_id = %d AND has_joined = 1",
+            $group_id,
+            $user_id
+        )
+    );
+    
+    if (!$user_exists) {
+        wp_send_json_error(['message' => 'User is not a member of this group']);
+    }
+    
+    // Update the user to be an owner
+    $result = $wpdb->update(
+        $wpdb->prefix . 'lef_groups_users',
+        ['is_owner' => 1],
+        [
+            'group_id' => $group_id,
+            'user_id' => $user_id
+        ],
+        ['%d'],
+        ['%d', '%d']
+    );
+    
+    if ($result === false) {
+        error_log('Failed to promote user to owner. Group ID: ' . $group_id . ', User ID: ' . $user_id);
+        wp_send_json_error(['message' => 'Database error occurred']);
+    } else {
+        wp_send_json_success(['message' => 'User promoted to owner successfully']);
+    }
+}
+add_action('wp_ajax_lef_promote_to_owner', 'lef_promote_to_owner_handler');
