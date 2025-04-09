@@ -19,7 +19,6 @@ if (!session_id()) {
     session_start();
 }
 
-
 //ensures that the creater of a group gets added as a user and creater of said group
 function lef_add_group_creator_to_table($post_ID, $post, $update) {
     global $wpdb;
@@ -68,11 +67,12 @@ function lef_auto_append_shortcodes( $content ) {
         $groepen_id = get_the_ID();
 
         // Append the wishlist form and wishlist items shortcodes.
+        $content .= do_shortcode( '[lef_assign_lists groepen_id="' . $groepen_id . '"] <hr>');
         $content .= do_shortcode( '[lef_show_group_users groepen_id="' . $groepen_id . '"]	<hr>' );
         $content .= do_shortcode( '[lef_add_wishlist_to_group group_id="' . $groepen_id . '"] <hr>' );
         $content .= do_shortcode( '[lef_display_group_wishlists groepen_id="' . $groepen_id . '"] <hr>' );
         $content .= do_shortcode( '[lef_leave_group_button groepen_id="' . $groepen_id . '"] <hr>' );
-        $content .= do_shortcode( '[lef_delete_group_button groepen_id="' . $groepen_id . '"]' );
+        $content .= do_shortcode( '[lef_delete_group_button groepen_id="' . $groepen_id . '"] <hr>' );
     }
     return $content;
 }
