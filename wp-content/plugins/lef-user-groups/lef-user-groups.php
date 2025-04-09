@@ -2,7 +2,7 @@
 /**
 * Plugin Name: LEF wishlist & groups system
 * Description: Custom system to allow users to make groups
-* Version: 1.0.8
+* Version: 1.1.3
 * Author: Marcel Miedema
 */
 
