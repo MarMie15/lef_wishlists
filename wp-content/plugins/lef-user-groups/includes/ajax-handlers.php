@@ -301,79 +301,79 @@ function lef_delete_item() {
             }
             break;
 
-            case 'remove_invite_existing_user':
-                if (!isset($_POST['group_id']) || !isset($_POST['user_id'])) {
-                    wp_send_json_error(['message' => 'Missing group or user ID.']);
-                }
+        case 'remove_invite_existing_user':
+            if (!isset($_POST['group_id']) || !isset($_POST['user_id'])) {
+                wp_send_json_error(['message' => 'Missing group or user ID.']);
+            }
             
-                $group_id = intval($_POST['group_id']);
-                $user_id = intval($_POST['user_id']);
-                $current_user_id = get_current_user_id();
+            $group_id = intval($_POST['group_id']);
+            $user_id = intval($_POST['user_id']);
+            $current_user_id = get_current_user_id();
             
-                // Verify that the current user is the owner
-                $is_owner = $wpdb->get_var($wpdb->prepare("
-                    SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
-                    WHERE group_id = %d AND user_id = %d AND is_owner = 1
+            // Verify that the current user is the owner
+            $is_owner = $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
+                WHERE group_id = %d AND user_id = %d AND is_owner = 1
                 ", $group_id, $current_user_id));
             
-                if (!$is_owner) {
-                    wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
-                }
+            if (!$is_owner) {
+                wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
+            }
             
-                // Check if the user has an invite (but hasn’t joined yet)
-                $invite_exists = $wpdb->get_var($wpdb->prepare("
-                    SELECT id FROM {$wpdb->prefix}lef_groups_users 
-                    WHERE group_id = %d AND user_id = %d
-                ", $group_id, $user_id));
+            // Check if the user has an invite (but hasn’t joined yet)
+            $invite_exists = $wpdb->get_var($wpdb->prepare("
+                SELECT id FROM {$wpdb->prefix}lef_groups_users 
+                WHERE group_id = %d AND user_id = %d
+            ", $group_id, $user_id));
             
-                if ($invite_exists) {
-                    // Delete the invite from `lef_group_invites`
-                    $wpdb->delete("{$wpdb->prefix}lef_groups_users", [
-                        'group_id' => $group_id,
-                        'user_id'  => $user_id
-                    ]);
-                    wp_send_json_success(['message' => 'Invite removed for existing user.']);
-                } else {
-                    wp_send_json_error(['message' => 'No pending invite found for this user.']);
-                }
-                break;
+            if ($invite_exists) {
+                // Delete the invite from `lef_group_invites`
+                $wpdb->delete("{$wpdb->prefix}lef_groups_users", [
+                    'group_id' => $group_id,
+                    'user_id'  => $user_id
+                ]);
+                wp_send_json_success(['message' => 'Invite removed for existing user.']);
+            } else {
+                wp_send_json_error(['message' => 'No pending invite found for this user.']);
+            }
+            break;
             
-            case 'remove_invite_unknown_user':
-                if (!isset($_POST['group_id']) || !isset($_POST['user_email'])) {
-                    wp_send_json_error(['message' => 'Missing group or user email.']);
-                }
-            
-                $group_id = intval($_POST['group_id']);
-                $user_email = sanitize_email($_POST['user_email']);
-                $current_user_id = get_current_user_id();
-            
-                // Verify that the current user is the owner
-                $is_owner = $wpdb->get_var($wpdb->prepare("
-                    SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
-                    WHERE group_id = %d AND user_id = %d AND is_owner = 1
-                ", $group_id, $current_user_id));
-            
-                if (!$is_owner) {
-                    wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
-                }
-            
-                // Check if the invite exists for this email
-                $invite_exists = $wpdb->get_var($wpdb->prepare("
-                    SELECT id FROM {$wpdb->prefix}lef_group_invites 
-                    WHERE group_id = %d AND email = %s
-                ", $group_id, $user_email));
-            
-                if ($invite_exists) {
-                    // Delete the invite from `lef_group_invites`
-                    $wpdb->delete("{$wpdb->prefix}lef_group_invites", [
-                        'group_id' => $group_id,
-                        'email'    => $user_email
-                    ]);
-                    wp_send_json_success(['message' => 'Invite removed for unknown user.']);
-                } else {
-                    wp_send_json_error(['message' => 'No pending invite found for this email.']);
-                }
-                break;
+        case 'remove_invite_unknown_user':
+            if (!isset($_POST['group_id']) || !isset($_POST['user_email'])) {
+                wp_send_json_error(['message' => 'Missing group or user email.']);
+            }
+        
+            $group_id = intval($_POST['group_id']);
+            $user_email = sanitize_email($_POST['user_email']);
+            $current_user_id = get_current_user_id();
+        
+            // Verify that the current user is the owner
+            $is_owner = $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
+                WHERE group_id = %d AND user_id = %d AND is_owner = 1
+            ", $group_id, $current_user_id));
+        
+            if (!$is_owner) {
+                wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
+            }
+        
+            // Check if the invite exists for this email
+            $invite_exists = $wpdb->get_var($wpdb->prepare("
+                SELECT id FROM {$wpdb->prefix}lef_group_invites 
+                WHERE group_id = %d AND email = %s
+            ", $group_id, $user_email));
+        
+            if ($invite_exists) {
+                // Delete the invite from `lef_group_invites`
+                $wpdb->delete("{$wpdb->prefix}lef_group_invites", [
+                    'group_id' => $group_id,
+                    'email'    => $user_email
+                ]);
+                wp_send_json_success(['message' => 'Invite removed for unknown user.']);
+            } else {
+                wp_send_json_error(['message' => 'No pending invite found for this email.']);
+            }
+            break;
             
         default:
             wp_send_json_error(['message' => 'Invalid delete type.']);
