@@ -615,6 +615,7 @@ function lef_color_test_shortcode(){
 add_shortcode('lef_color_test','lef_color_test_shortcode');
 
 //testing email styling
+//  put  http://www.startthema.test/?test_view=email   in the adress bar
 function lef_send_test_email() {
     // Fetch configurable colors from theme
     $primary_color = get_theme_mod('lef_primary_color', '#1f8a4d');
