@@ -1,10 +1,12 @@
 jQuery(document).ready(function($) {
+    // Only initialize when we're on a group page with the user list
+    if (!$('.lef-group-users').length) return;
+    
     let selectMode = false;
     let selectedUserId = null;
-    const groupId = ' . $group_id . ';
+    const groupId = $('#lef_invite_user').data('group-id');
     const addOwnerBtn = $("#lef-add-owner-btn");
     const userItems = $(".lef-regular-user");
-    const ownerItems = $(".lef-owner-user");
     const modalConfirm = $("#lef-confirm-modal");
     const confirmYes = $("#lef-confirm-yes");
     const confirmNo = $("#lef-confirm-no");
@@ -18,7 +20,7 @@ jQuery(document).ready(function($) {
         if (selectMode) {
             // Enable selection mode
             addOwnerBtn.text("Cancel").addClass("lef-cancel-btn");
-            $(".lef-group-users h3, .lef-form-item, .lef-owner-user, h3:contains(\'Pending invites\'), h3 + ul").addClass("lef-dimmed");
+            $(".lef-group-users h3, .lef-form-item, .lef-owner-user, h3:contains('Pending invites'), h3 + ul").addClass("lef-dimmed");
             userItems.addClass("lef-highlight");
             
             // Add click handlers to non-owner users
@@ -53,18 +55,18 @@ jQuery(document).ready(function($) {
     
     confirmNo.on("click", function() {
         modalConfirm.hide();
-        // Don\'t reset UI so they can pick another user
+        resetUI(); //resets the UI to before, delete to allow a user to select again when they cancel
     });
     
     function promoteToOwner(userId) {
         $.ajax({
-            url: "' . admin_url('admin-ajax.php') . '",
+            url: lefWishlistData.ajax_url,
             type: "POST",
             data: {
                 action: "lef_promote_to_owner",
                 user_id: userId,
                 group_id: groupId,
-                security: "' . wp_create_nonce('lef-owner-nonce') . '"
+                security: lefOwnerData.nonce
             },
             success: function(response) {
                 if (response.success) {
