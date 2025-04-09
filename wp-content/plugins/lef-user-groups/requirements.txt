@@ -29,8 +29,8 @@
 # --allow "owner" to delete users
 
 # -leave group button for user
---to-discuss allow "owner" to make other users a "owner" aswell (approved by kris)
--allow a owner to randomly assign a different users wishist to someone else
+# --to-discuss allow "owner" to make other users a "owner" aswell (approved by kris)
+# -allow a owner to randomly assign a different users wishist to someone else
 
 # make sure a user can only access wishlists and groups they are a part of   //seems correct for now
 
