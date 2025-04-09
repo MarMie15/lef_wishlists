@@ -18,10 +18,25 @@ function lef_enqueue_scripts() {
             plugin_dir_url(__FILE__) . 'js/groups.js', 
             array('jquery'), 
             null, 
-            true);
+            true
+        );
 
         wp_localize_script('lef-groups-js', 'lefWishlistData', array(
             'ajax_url' => admin_url('admin-ajax.php'),
+        ));
+
+        // Enqueue the new promote-owner.js file
+        wp_enqueue_script(
+            'promote-owner',
+            plugin_dir_url(__FILE__) . 'js/promote-owner.js',
+            array('jquery'),
+            null,
+            true
+        );
+        
+        // Add nonce for the owner promotion functionality
+        wp_localize_script('promote-owner', 'lefOwnerData', array(
+            'nonce' => wp_create_nonce('lef-owner-nonce'),
         ));
     }
 
