@@ -617,8 +617,53 @@ function lef_wishlist_nav_button_shortcode() {
 }
 add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');
 
-
-
+function lef_assign_lists_shortcode(){
+    global $wpdb;
+    
+    // Get the group ID from either URL parameter or current post
+    $group_id = isset($_GET['group_id']) ? intval($_GET['group_id']) : get_the_ID();
+    
+    // Verify we're on a group post type
+    if (get_post_type($group_id) !== 'lef_groepen') {
+        return '<p>This shortcode can only be used within a group page.</p>';
+    }
+    
+    // Query to get wishlists and their owners for this group
+    $query = $wpdb->prepare("
+        SELECT gw.*, p.post_author, u.display_name
+        FROM {$wpdb->prefix}lef_group_wishlists gw
+        JOIN {$wpdb->posts} p ON gw.wishlist_ID = p.ID
+        JOIN {$wpdb->users} u ON p.post_author = u.ID
+        WHERE gw.group_ID = %d
+        ORDER BY gw.added_at DESC
+    ", $group_id);
+    
+    $results = $wpdb->get_results($query);
+    
+    if (empty($results)) {
+        return '<p>No wishlists have been added to this group yet.</p>';
+    }
+    
+    $output = '<div class="lef-group-wishlists">';
+    $output .= '<h3>Wishlists Added to This Group</h3>';
+    $output .= '<ul class="lef-wishlist-users">';
+    
+    foreach ($results as $result) {
+        $date_added = date('F j, Y', strtotime($result->added_at));
+        $output .= sprintf(
+            '<li class="lef-list-item display-block">
+                <span class="user-name">%s added their list</span>
+            </li>',
+            esc_html($result->display_name),
+            esc_html($date_added)
+        );
+    }
+    
+    $output .= '</ul></div>';
+    
+    return $output;
+}
+add_shortcode('lef_assign_lists', 'lef_assign_lists_shortcode');
 
 
 
