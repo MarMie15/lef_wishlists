@@ -292,6 +292,54 @@ ul {
     align-content: center;
 }
 
+/* styling for the promote owner button */
+.lef-dimmed {
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.lef-highlight {
+    transition: transform 0.3s ease;
+}
+
+.lef-highlight:hover {
+    transform: scale(1.10);
+    cursor: pointer;
+}
+
+.lef-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.lef-modal-content {
+    background-color: var(--lef-primary-color, white);
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.lef-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.lef-cancel-btn {
+    background-color: #ff3333 !important;
+    color: white !important;
+}
+
 
 
 /* testing css */
