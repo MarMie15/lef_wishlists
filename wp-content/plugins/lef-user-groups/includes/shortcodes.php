@@ -619,6 +619,7 @@ add_shortcode('lef_wishlist_button', 'lef_wishlist_nav_button_shortcode');
 
 function lef_assign_lists_shortcode(){
     global $wpdb;
+    $current_user_id = get_current_user_id();
     
     // Get the group ID from either URL parameter or current post
     $group_id = isset($_GET['group_id']) ? intval($_GET['group_id']) : get_the_ID();
@@ -627,7 +628,20 @@ function lef_assign_lists_shortcode(){
     if (get_post_type($group_id) !== 'lef_groepen') {
         return '<p>This shortcode can only be used within a group page.</p>';
     }
-    
+
+    // Check if the current user is an owner of the group
+    $is_owner = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM wp_lef_groups_users WHERE group_id = %d AND user_id = %d AND is_owner = 1",
+            $group_id,
+            $current_user_id
+        )
+    );
+
+    if (!$is_owner) {
+        return '';
+    }
+
     // Query to get wishlists and their owners for this group
     $query = $wpdb->prepare("
         SELECT gw.*, p.post_author, u.display_name
@@ -643,9 +657,36 @@ function lef_assign_lists_shortcode(){
     if (empty($results)) {
         return '<p>No wishlists have been added to this group yet.</p>';
     }
+
+    // Get total number of users in group (both joined, invited users and email invites)
+    $total_users = $wpdb->get_var($wpdb->prepare("
+        SELECT (
+            SELECT COUNT(DISTINCT user_ID) 
+            FROM {$wpdb->prefix}lef_groups_users 
+            WHERE group_ID = %d
+        ) + (
+            SELECT COUNT(DISTINCT email)
+            FROM {$wpdb->prefix}lef_group_invites
+            WHERE group_ID = %d
+        ) as total
+    ", $group_id, $group_id));
+
+    // Get number of users who have added lists
+    $users_with_lists = $wpdb->get_var($wpdb->prepare("
+        SELECT COUNT(DISTINCT p.post_author)
+        FROM {$wpdb->prefix}lef_group_wishlists gw
+        JOIN {$wpdb->posts} p ON gw.wishlist_ID = p.ID
+        WHERE gw.group_ID = %d
+    ", $group_id));
+
     
     $output = '<div class="lef-group-wishlists">';
-    $output .= '<h3>Wishlists Added to This Group</h3>';
+    $output .=      '<div class="lef-group-wishlists-head">';
+    $output .=          '<h3>Wishlists Added to This Group';
+    $output .= sprintf(' (%d/%d)', $users_with_lists, $total_users);
+    $output .=          '</h3>';
+    $output .=          '<button id="lef-assign-lists-button" class="lef-list-item">Assign Lists</button>';
+    $output .=      '</div>';
     $output .= '<ul class="lef-wishlist-users">';
     
     foreach ($results as $result) {
