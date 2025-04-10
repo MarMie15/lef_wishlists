@@ -64,34 +64,26 @@ var lefGroupWishlist = (function() {
     }    
 
     function addWishlistToGroup(wishlistID) {
-        let message = document.getElementById("group-wishlist-message");
-    
-        if (!message) {
-            console.error("group-wishlist-message element not found in the DOM.");
-            return;
-        }
-        
         jQuery.ajax({
             url: lefWishlistData.ajax_url,
             type: "POST",
             data: {
                 action: "lef_add_wishlist_to_group",
                 wishlist_id: wishlistID,
-                groepen_id: groupId
+                group_id: groupId,
+                security: lefWishlistData.nonce
             },
             success: function(response) {
                 if (response.success) {
-                    message.textContent = `Your wishlist has been added to this group`;
-                    message.style.display = "block";
-                    
-                    setTimeout(() => {
-                        message.style.display = "none";
-                        location.reload();
-                    }, 1500);
-                    
+                    location.reload();
                 } else {
-                    alert("Failed to add wishlist. Please try again.");
+                    console.error("Failed to add wishlist:", response.data.message);
+                    alert(response.data.message || "Failed to add wishlist. Please try again.");
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", error);
+                alert("An error occurred while adding the wishlist. Please try again.");
             }
         });
     }

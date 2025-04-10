@@ -64,15 +64,16 @@ function lef_auto_append_shortcodes( $content ) {
 
     //attach the following shortcode's to single posts of lef_groepen
     if ( is_singular( 'lef_groepen' ) && is_main_query() ) {
-        $groepen_id = get_the_ID();
+        $group_id = get_the_ID();
 
         // Append the wishlist form and wishlist items shortcodes.
-        $content .= do_shortcode( '[lef_assign_lists groepen_id="' . $groepen_id . '"] <hr>');
-        $content .= do_shortcode( '[lef_show_group_users groepen_id="' . $groepen_id . '"]	<hr>' );
-        $content .= do_shortcode( '[lef_add_wishlist_to_group group_id="' . $groepen_id . '"] <hr>' );
-        $content .= do_shortcode( '[lef_display_group_wishlists groepen_id="' . $groepen_id . '"] <hr>' );
-        $content .= do_shortcode( '[lef_leave_group_button groepen_id="' . $groepen_id . '"] <hr>' );
-        $content .= do_shortcode( '[lef_delete_group_button groepen_id="' . $groepen_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_assign_lists group_id="' . $group_id . '"] <hr>');
+        $content .= do_shortcode( '[lef_show_group_users group_id="' . $group_id . '"]	<hr>' );
+        // $content .= do_shortcode( '[lef_add_wishlist_to_group group_id="' . $group_id . '"] <hr>' );
+        // $content .= do_shortcode( '[lef_display_group_wishlists group_id="' . $group_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_add_and_display_wishlist group_id="' . $group_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_leave_group_button group_id="' . $group_id . '"] <hr>' );
+        $content .= do_shortcode( '[lef_delete_group_button group_id="' . $group_id . '"] <hr>' );
     }
     return $content;
 }

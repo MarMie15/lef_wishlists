@@ -102,6 +102,9 @@ ul {
     pointer-events: none; /* Disable clicks initially */
     position: absolute;
     right: 5px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.3);
+    z-index: 10;
 }
 
 /* Expand space on hover */
@@ -112,7 +115,7 @@ ul {
 /* Show Delete Button on Hover */
 .lef-list-item:hover .lef-delete-button {
     opacity: 1;
-    transform: scale(0.8);
+    transform: translateY(-50%) scale(0.8);
     pointer-events: auto; /* Enable clicks after animation */
 }
 

@@ -23,6 +23,7 @@ function lef_enqueue_scripts() {
 
         wp_localize_script('lef-groups-js', 'lefWishlistData', array(
             'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('lef-wishlist-nonce')
         ));
 
         // Enqueue the new promote-owner.js file

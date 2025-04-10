@@ -22,7 +22,7 @@ jQuery(document).ready(function($) {
                 
                 // Add message
                 modalContent.innerHTML = `
-                    <p>There are more users than wishlists to assign them to. Each user needs to create a wishlist before assignments can be made.</p>
+                    <p>There are more users than wishlists to assign them to.<br> Each user needs to create a wishlist before assignments can be made.</p>
                     <div class="lef-modal-actions">
                         <button id="lef-modal-close" class="lef-list-item">Close</button>
                     </div>

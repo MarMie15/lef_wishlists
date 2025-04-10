@@ -41,8 +41,6 @@ jQuery(document).ready(function($) {
             data: requestData,
             success: function(response) {  
                 if (response.success) {
-                    alert(response.data.message);
-            
                     if (response.data.redirect_url) {
                         window.location.href = response.data.redirect_url;  
                     } else {
@@ -51,8 +49,7 @@ jQuery(document).ready(function($) {
                 } else {
                     alert(response.data.message);
                 }
-            }            
-            ,
+            },
             error: function() {
                 alert("An error occurred. Please try again.");
             }

@@ -164,50 +164,73 @@ function lef_get_user_wishlists() {
 add_action('wp_ajax_lef_get_user_wishlists', 'lef_get_user_wishlists');
 add_action('wp_ajax_nopriv_lef_get_user_wishlists', 'lef_get_user_wishlists');
 
-function lef_add_wishlist_to_group() {
+function lef_add_wishlist_to_group_handler() {
+    // Verify nonce for security
+    if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'lef-wishlist-nonce')) {
+        error_log('Security check failed in lef_add_wishlist_to_group_handler');
+        wp_send_json_error(['message' => 'Security check failed']);
+    }
+    
     global $wpdb;
-
-    // Get the data from AJAX request
-    $wishlist_id = isset($_POST['wishlist_id']) ? intval($_POST['wishlist_id']) : 0;
-    $groepen_id = isset($_POST['groepen_id']) ? intval($_POST['groepen_id']) : 0;
+    $current_user_id = get_current_user_id();
     
-    if (!$wishlist_id || !$groepen_id) {
-        wp_send_json_error(["message" => "Invalid input data"]);
+    // Check if required parameters are provided
+    if (!isset($_POST['group_id']) || !isset($_POST['wishlist_id'])) {
+        error_log('Missing parameters in lef_add_wishlist_to_group_handler. POST data: ' . print_r($_POST, true));
+        wp_send_json_error(['message' => 'Missing group ID or wishlist ID']);
     }
     
-    $table_name = $wpdb->prefix . 'lef_group_wishlists';
-
-    $existing = $wpdb->get_var($wpdb->prepare(
-        "SELECT id FROM $table_name WHERE wishlist_id = %d AND group_id = %d",
-        $wishlist_id,
-        $groepen_id
-    ));
-
-    if ($existing) {
-        wp_send_json_error(array('message' => 'Wishlist is already in the Group'));
-    }
-
-    // Insert into the database
-    $result = $wpdb->insert(
-        $table_name,
-        [
-            "group_ID" => $groepen_id,
-            "wishlist_ID" => $wishlist_id,
-            "added_at" => current_time("mysql"),
-            "accessible_by" => 0
-        ],
-        ["%d", "%d", "%s", "%d"]
+    $group_id = intval($_POST['group_id']);
+    $wishlist_id = intval($_POST['wishlist_id']);
+    
+    // Check if user is a member of the group
+    $is_member = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_ID = %d AND user_ID = %d AND has_joined = 1",
+            $group_id,
+            $current_user_id
+        )
     );
-
-    if ($result) {
-        wp_send_json_success(["message" => "Wishlist added successfully"]);
-
-    } else {
-        wp_send_json_error(["message" => "Database insert failed  wishlist: ". $wishlist_id ."  group:  " . $groepen_id]);
+    
+    if (!$is_member) {
+        error_log("User $current_user_id is not a member of group $group_id");
+        wp_send_json_error(['message' => 'You are not a member of this group']);
     }
+    
+    // Check if user already has a wishlist in this group
+    $existing_wishlist = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_group_wishlists WHERE group_ID = %d AND wishlist_ID = %d",
+            $group_id,
+            $wishlist_id
+        )
+    );
+    
+    if ($existing_wishlist) {
+        error_log("Wishlist $wishlist_id is already in group $group_id");
+        wp_send_json_error(['message' => 'This wishlist is already in the group']);
+    }
+    
+    // Add the wishlist to the group
+    $result = $wpdb->insert(
+        $wpdb->prefix . 'lef_group_wishlists',
+        [
+            'group_ID' => $group_id,
+            'wishlist_ID' => $wishlist_id,
+            'added_at' => current_time('mysql')
+        ],
+        ['%d', '%d', '%s']
+    );
+    
+    if ($result === false) {
+        error_log('Failed to add wishlist to group. Group ID: ' . $group_id . ', Wishlist ID: ' . $wishlist_id . '. DB Error: ' . $wpdb->last_error);
+        wp_send_json_error(['message' => 'Failed to add wishlist. Please try again.']);
+    }
+    
+    wp_send_json_success(['message' => 'Wishlist added to group successfully']);
 }
-add_action("wp_ajax_lef_add_wishlist_to_group", "lef_add_wishlist_to_group");
-add_action("wp_ajax_nopriv_lef_add_wishlist_to_group", "lef_add_wishlist_to_group");
+add_action('wp_ajax_lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_handler');
+add_action('wp_ajax_nopriv_lef_add_wishlist_to_group', 'lef_add_wishlist_to_group_handler');
 
 //delete item
 function lef_delete_item() {
@@ -245,7 +268,7 @@ function lef_delete_item() {
 
             $deleted = $wpdb->delete(
                 "{$wpdb->prefix}lef_wishlist_items",
-                ['wishlist_id' => $wishlist_id, 'product_id' => $product_id]
+                ['wishlist_ID' => $wishlist_id, 'product_ID' => $product_id]
             );
 
             if ($deleted) {
@@ -265,7 +288,7 @@ function lef_delete_item() {
 
             $entry = $wpdb->get_row($wpdb->prepare("
                 SELECT id FROM {$wpdb->prefix}lef_group_wishlists
-                WHERE group_id = %d AND wishlist_id = %d
+                WHERE group_ID = %d AND wishlist_ID = %d
             ", $group_id, $wishlist_id));
 
             if ($entry) {
@@ -287,13 +310,13 @@ function lef_delete_item() {
             // ownership check using lef_groups_users
             $is_owner = $wpdb->get_var($wpdb->prepare("
                 SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
-                WHERE group_id = %d AND user_id = %d AND is_owner = 1
+                WHERE group_ID = %d AND user_ID = %d AND is_owner = 1
             ", $group_id, $user_id));
 
             if ($is_owner) {
                 $wpdb->delete("{$wpdb->prefix}lef_groups_users", [
-                    'group_id' => $group_id,
-                    'user_id'  => $target_user_id
+                    'group_ID' => $group_id,
+                    'user_ID'  => $target_user_id
                 ]);
                 wp_send_json_success(['message' => 'User removed from group.']);
             } else {
@@ -313,24 +336,24 @@ function lef_delete_item() {
             // Verify that the current user is the owner
             $is_owner = $wpdb->get_var($wpdb->prepare("
                 SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
-                WHERE group_id = %d AND user_id = %d AND is_owner = 1
+                WHERE group_ID = %d AND user_ID = %d AND is_owner = 1
                 ", $group_id, $current_user_id));
             
             if (!$is_owner) {
                 wp_send_json_error(['message' => 'You do not have permission to remove this invite.']);
             }
             
-            // Check if the user has an invite (but hasn’t joined yet)
+            // Check if the user has an invite (but hasn't joined yet)
             $invite_exists = $wpdb->get_var($wpdb->prepare("
                 SELECT id FROM {$wpdb->prefix}lef_groups_users 
-                WHERE group_id = %d AND user_id = %d
+                WHERE group_ID = %d AND user_ID = %d
             ", $group_id, $user_id));
             
             if ($invite_exists) {
                 // Delete the invite from `lef_group_invites`
                 $wpdb->delete("{$wpdb->prefix}lef_groups_users", [
-                    'group_id' => $group_id,
-                    'user_id'  => $user_id
+                    'group_ID' => $group_id,
+                    'user_ID'  => $user_id
                 ]);
                 wp_send_json_success(['message' => 'Invite removed for existing user.']);
             } else {
@@ -350,7 +373,7 @@ function lef_delete_item() {
             // Verify that the current user is the owner
             $is_owner = $wpdb->get_var($wpdb->prepare("
                 SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users
-                WHERE group_id = %d AND user_id = %d AND is_owner = 1
+                WHERE group_ID = %d AND user_ID = %d AND is_owner = 1
             ", $group_id, $current_user_id));
         
             if (!$is_owner) {
@@ -360,13 +383,13 @@ function lef_delete_item() {
             // Check if the invite exists for this email
             $invite_exists = $wpdb->get_var($wpdb->prepare("
                 SELECT id FROM {$wpdb->prefix}lef_group_invites 
-                WHERE group_id = %d AND email = %s
+                WHERE group_ID = %d AND email = %s
             ", $group_id, $user_email));
         
             if ($invite_exists) {
                 // Delete the invite from `lef_group_invites`
                 $wpdb->delete("{$wpdb->prefix}lef_group_invites", [
-                    'group_id' => $group_id,
+                    'group_ID' => $group_id,
                     'email'    => $user_email
                 ]);
                 wp_send_json_success(['message' => 'Invite removed for unknown user.']);
@@ -392,10 +415,10 @@ function lef_handle_invite_action() {
     $action_type = sanitize_text_field($_POST['action_type']);
 
     if ($action_type === 'accept') {
-        $wpdb->update("{$wpdb->prefix}lef_groups_users", ['has_joined' => 1], ['user_id' => $user_id, 'group_id' => $group_id]);
+        $wpdb->update("{$wpdb->prefix}lef_groups_users", ['has_joined' => 1], ['user_ID' => $user_id, 'group_ID' => $group_id]);
         wp_send_json_success('Invite accepted!');
     } elseif ($action_type === 'decline') {
-        $wpdb->delete("{$wpdb->prefix}lef_groups_users", ['user_id' => $user_id, 'group_id' => $group_id]);
+        $wpdb->delete("{$wpdb->prefix}lef_groups_users", ['user_ID' => $user_id, 'group_ID' => $group_id]);
         wp_send_json_success('Invite declined.');
     }
 
@@ -561,7 +584,7 @@ function lef_send_invite() {
 
         // Check if user is already in the group
         $existing_user = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $table_groups_users WHERE group_id = %d AND user_id = %d",
+            "SELECT id FROM $table_groups_users WHERE group_ID = %d AND user_ID = %d",
             $group_id, $user_id
         ));
         
@@ -575,8 +598,8 @@ function lef_send_invite() {
         
         // If not in the group, add user
         $wpdb->insert($table_groups_users, [
-            'group_id'   => $group_id,
-            'user_id'    => $user_id,
+            'group_ID'   => $group_id,
+            'user_ID'    => $user_id,
             'has_joined' => 0,
             'added_at'   => current_time('mysql')
         ]);
@@ -616,7 +639,7 @@ function lef_send_invite() {
         $table_invites = $wpdb->prefix . "lef_group_invites";
 
         $existing_invite = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $table_invites WHERE group_id = %d AND email = %s",
+            "SELECT id FROM $table_invites WHERE group_ID = %d AND email = %s",
             $group_id, $email
         ));
 
@@ -629,7 +652,7 @@ function lef_send_invite() {
         $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
 
         $wpdb->insert($table_invites, [
-            'group_id'       => $group_id,
+            'group_ID'       => $group_id,
             'email'          => $email,
             'invite_token'   => $token,
             'invite_expires' => $expires,
@@ -693,7 +716,7 @@ function lef_promote_to_owner_handler() {
     // Check if current user is an owner of the group
     $is_owner = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_id = %d AND user_id = %d AND is_owner = 1",
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_ID = %d AND user_ID = %d AND is_owner = 1",
             $group_id,
             $current_user_id
         )
@@ -706,7 +729,7 @@ function lef_promote_to_owner_handler() {
     // Check if target user exists in the group
     $user_exists = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_id = %d AND user_id = %d AND has_joined = 1",
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_ID = %d AND user_ID = %d AND has_joined = 1",
             $group_id,
             $user_id
         )
@@ -721,8 +744,8 @@ function lef_promote_to_owner_handler() {
         $wpdb->prefix . 'lef_groups_users',
         ['is_owner' => 1],
         [
-            'group_id' => $group_id,
-            'user_id' => $user_id
+            'group_ID' => $group_id,
+            'user_ID' => $user_id
         ],
         ['%d'],
         ['%d', '%d']
@@ -736,3 +759,64 @@ function lef_promote_to_owner_handler() {
     }
 }
 add_action('wp_ajax_lef_promote_to_owner', 'lef_promote_to_owner_handler');
+
+function lef_remove_from_group_handler() {
+    // Verify nonce for security
+    if (!isset($_POST['security']) || !wp_verify_nonce($_POST['security'], 'lef-owner-nonce')) {
+        wp_send_json_error(['message' => 'Security check failed']);
+    }
+    
+    global $wpdb;
+    $current_user_id = get_current_user_id();
+    
+    // Check if required parameters are provided
+    if (!isset($_POST['user_id']) || !isset($_POST['group_id'])) {
+        wp_send_json_error(['message' => 'Missing required parameters']);
+    }
+    
+    $user_id = intval($_POST['user_id']);
+    $group_id = intval($_POST['group_id']);
+    
+    // Check if current user is an owner of the group
+    $is_owner = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_ID = %d AND user_ID = %d AND is_owner = 1",
+            $group_id,
+            $current_user_id
+        )
+    );
+    
+    if (!$is_owner) {
+        wp_send_json_error(['message' => 'You do not have permission to remove users']);
+    }
+    
+    // Check if target user exists in the group
+    $user_exists = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users WHERE group_ID = %d AND user_ID = %d AND has_joined = 1",
+            $group_id,
+            $user_id
+        )
+    );
+    
+    if (!$user_exists) {
+        wp_send_json_error(['message' => 'User is not a member of this group']);
+    }
+    
+    // Remove the user from the group
+    $result = $wpdb->delete(
+        $wpdb->prefix . 'lef_groups_users',
+        [
+            'group_ID' => $group_id,
+            'user_ID' => $user_id
+        ],
+        ['%d', '%d']
+    );
+    
+    if ($result === false) {
+        error_log('Failed to remove user from group. Group ID: ' . $group_id . ', User ID: ' . $user_id);
+        wp_send_json_error(['message' => 'Database error occurred']);
+    } else {
+        wp_send_json_success(['message' => 'User removed from group successfully']);
+    }
+}
