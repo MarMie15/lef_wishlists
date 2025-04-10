@@ -20,7 +20,7 @@ jQuery(document).ready(function($) {
         if (selectMode) {
             // Enable selection mode
             addOwnerBtn.text("Cancel").addClass("lef-cancel-btn");
-            $(".lef-group-users h3, .lef-form-item, .lef-owner-user, .lef-delete-group-button, h3:contains('Pending invites'), h3:contains('Your wishlists'), h3 + ul, .lef-group-wishlists, .lef-group-wishlists-head, .lef-wishlist-users").addClass("lef-dimmed");
+            $(".lef-group-users h3, .lef-form-item, .lef-owner-user, .lef-group-wishlist-container, .lef-delete-group-button, h3:contains('Pending invites'), h3:contains('Your wishlists'), h3 + ul, .lef-group-wishlists, .lef-group-wishlists-head, .lef-wishlist-users").addClass("lef-dimmed");
             userItems.addClass("lef-highlight");
             
             //stops the delete button x and styling from applying

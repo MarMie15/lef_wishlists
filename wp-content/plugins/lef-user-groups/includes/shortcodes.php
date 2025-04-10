@@ -663,7 +663,7 @@ function lef_assign_lists_shortcode(){
     
     $output = '<div class="lef-group-wishlists">';
     $output .=      '<div class="lef-group-wishlists-head">';
-    $output .=          '<h3>Wishlists Added to This Group';
+    $output .=          '<h3>Wishlists added to this group';
     $output .= sprintf(' (%d/%d)', $users_with_lists, $total_users);
     $output .=          '</h3>';
     $output .= sprintf(

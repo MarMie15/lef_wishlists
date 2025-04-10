@@ -21,37 +21,65 @@ jQuery(document).ready(function($) {
         let productID = $(this).data('product-id') || null;
         let userEmail = $(this).data('user-email') || null;
 
-        if (!confirm("Are you sure you want to delete this item?")) return;
+        // Create modal elements
+        const modal = document.createElement('div');
+        modal.classList.add('lef-modal');
+        
+        const modalContent = document.createElement('div'); 
+        modalContent.classList.add('lef-modal-content');
+        
+        // Add message
+        modalContent.innerHTML = `
+            <p>Are you sure you want to delete this item?</p>
+            <div class="lef-modal-actions">
+                <button id="lef-delete-confirm" class="lef-list-item" style="background-color: #4CAF50; color: white;">Yes</button>
+                <button id="lef-delete-cancel" class="lef-list-item lef-cancel-btn">No</button>
+            </div>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Add button handlers
+        document.getElementById('lef-delete-confirm').addEventListener('click', function() {
+            let requestData = {
+                action: 'lef_delete_item',
+                delete_type: deleteType,
+                item_id: itemID,
+            };
 
-        let requestData = {
-            action: 'lef_delete_item',
-            delete_type: deleteType,
-            item_id: itemID,
-        };
+            if (groupID) requestData.group_id = groupID;
+            if (userID) requestData.user_id = userID;
+            if (wishlistID) requestData.wishlist_id = wishlistID;
+            if (productID) requestData.product_id = productID;
+            if (userEmail) requestData.user_email = userEmail;
 
-        if (groupID) requestData.group_id = groupID;
-        if (userID) requestData.user_id = userID;
-        if (wishlistID) requestData.wishlist_id = wishlistID;
-        if (productID) requestData.product_id = productID;
-        if (userEmail) requestData.user_email = userEmail;
-
-        $.ajax({
-            type: 'POST',
-            url: lefDeleteData.ajax_url,
-            data: requestData,
-            success: function(response) {  
-                if (response.success) {
-                    if (response.data.redirect_url) {
-                        window.location.href = response.data.redirect_url;  
+            $.ajax({
+                url: lefDeleteData.ajax_url,
+                type: 'POST',
+                data: requestData,
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
                     } else {
-                        location.reload(); // Only reload if no redirect
+                        alert(response.data.message || 'Failed to delete item. Please try again.');
                     }
-                } else {
-                    alert(response.data.message);
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
                 }
-            },
-            error: function() {
-                alert("An error occurred. Please try again.");
+            });
+            modal.remove();
+        });
+        
+        document.getElementById('lef-delete-cancel').addEventListener('click', function() {
+            modal.remove();
+        });
+        
+        // Close modal when clicking outside the content
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.remove();
             }
         });
     });
