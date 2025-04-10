@@ -334,6 +334,7 @@ ul {
 
 .lef-modal-content {
     background-color: var(--lef-primary-color, white);
+    max-width: 650px;
     padding: 20px;
     border-radius: 5px;
     text-align: center;

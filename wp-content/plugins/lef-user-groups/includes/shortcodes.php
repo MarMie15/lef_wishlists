@@ -685,11 +685,15 @@ function lef_assign_lists_shortcode(){
     $output .=          '<h3>Wishlists Added to This Group';
     $output .= sprintf(' (%d/%d)', $users_with_lists, $total_users);
     $output .=          '</h3>';
-    $output .=          '<button id="lef-assign-lists-button" class="lef-list-item">Assign Lists</button>';
+    $output .= sprintf(
+        '<button id="lef-assign-lists-button" class="lef-list-item" data-users-wishlists="%d" data-total-users="%d">Assign Lists</button>',
+        $users_with_lists,
+        $total_users
+    );
     $output .=      '</div>';
     $output .= '<ul class="lef-wishlist-users">';
     
-    foreach ($results as $result) {
+    foreach ($results as $result) { 
         $date_added = date('F j, Y', strtotime($result->added_at));
         $output .= sprintf(
             '<li class="lef-list-item display-block">
@@ -705,6 +709,11 @@ function lef_assign_lists_shortcode(){
     return $output;
 }
 add_shortcode('lef_assign_lists', 'lef_assign_lists_shortcode');
+
+
+
+
+
 
 
 
