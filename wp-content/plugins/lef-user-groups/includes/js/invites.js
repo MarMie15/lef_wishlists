@@ -20,12 +20,20 @@ jQuery(document).ready(function($) {
                 if (response.success) {
                     button.parent().fadeOut();
                     if(actionType == 'accept'){
-                        alert("Invite accepted");
+                        $('<div class="lef-notice lef-notice-success"><p>Invite accepted successfully.</p></div>')
+                            .appendTo('body')
+                            .delay(3000)
+                            .fadeOut(400, function() { $(this).remove(); });
                     }
                 } else {
-                    alert(response);
+                    $('<div class="lef-notice lef-notice-error"><p>' + (response.data || 'An error occurred. Please try again.') + '</p></div>')
+                        .appendTo('body')
+                        .delay(3000)
+                        .fadeOut(400, function() { $(this).remove(); });
                 }
-                location.reload();
+                setTimeout(function() {
+                    location.reload();
+                }, 3000);
             }
         });
     });
@@ -41,7 +49,10 @@ jQuery(document).ready(function($) {
         let groupID = form.data('group-id'); 
     
         if (!email || !groupID) {
-            alert("Error: Missing email or group information.");
+            $('<div class="lef-notice lef-notice-error"><p>Error: Missing email or group information.</p></div>')
+                .appendTo('body')
+                .delay(3000)
+                .fadeOut(400, function() { $(this).remove(); });
             return;
         }
     
@@ -58,15 +69,27 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    alert("Invite sent successfully!");
+                    $('<div class="lef-notice lef-notice-success"><p>Invite sent successfully!</p></div>')
+                        .appendTo('body')
+                        .delay(3000)
+                        .fadeOut(400, function() { $(this).remove(); });
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2500);
                 } else {
-                    alert(response.data); // Show the returned error message
+                    $('<div class="lef-notice lef-notice-error"><p>' + (response.data || 'Failed to send invite. Please try again.') + '</p></div>')
+                        .appendTo('body')
+                        .delay(3000)
+                        .fadeOut(400, function() { $(this).remove(); });
                 }
                 emailInput.val("").prop('disabled', false);
-                location.reload();
             },
             error: function(error) {
                 console.error("AJAX Error:", error);
+                $('<div class="lef-notice lef-notice-error"><p>An error occurred. Please try again.</p></div>')
+                    .appendTo('body')
+                    .delay(3000)
+                    .fadeOut(400, function() { $(this).remove(); });
                 emailInput.prop('disabled', false);
             }
         });        

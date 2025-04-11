@@ -667,9 +667,10 @@ function lef_assign_lists_shortcode(){
     $output .= sprintf(' (%d/%d)', $users_with_lists, $total_users);
     $output .=          '</h3>';
     $output .= sprintf(
-        '<button id="lef-assign-lists-button" class="lef-list-item" data-users-wishlists="%d" data-total-users="%d">Assign Lists</button>',
+        '<button id="lef-assign-lists-button" class="lef-list-item" data-users-wishlists="%d" data-total-users="%d" data-group-id="%d">Assign Lists</button>',
         $users_with_lists,
-        $total_users
+        $total_users,
+        $group_id
     );
     $output .=      '</div>';
     $output .= '<ul class="lef-wishlist-users">';

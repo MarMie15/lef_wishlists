@@ -94,6 +94,7 @@ function lef_enqueue_scripts() {
 
     wp_localize_script('lef-assign-lists-js', 'lefAssignListsData', array(
         'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('lef-delete-nonce')
     ));
 }
 add_action('wp_enqueue_scripts', 'lef_enqueue_scripts');

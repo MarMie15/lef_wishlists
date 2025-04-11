@@ -820,3 +820,108 @@ function lef_remove_from_group_handler() {
         wp_send_json_success(['message' => 'User removed from group successfully']);
     }
 }
+
+function lef_get_group_wishlists_and_users() {
+    if (!isset($_POST['group_id'])) {
+        wp_send_json_error(['message' => 'Missing group ID']);
+    }
+
+    global $wpdb;
+    $group_id = intval($_POST['group_id']);
+    $current_user_id = get_current_user_id();
+
+    // Check if user is an owner of the group
+    $is_owner = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users 
+         WHERE group_ID = %d AND user_ID = %d AND is_owner = 1",
+        $group_id,
+        $current_user_id
+    ));
+
+    if (!$is_owner) {
+        wp_send_json_error(['message' => 'You are not authorized to perform this action']);
+    }
+
+    // Get all wishlists in the group with their owners
+    $wishlists = $wpdb->get_results($wpdb->prepare("
+        SELECT gw.wishlist_ID as id, p.post_title as title, p.post_author as owner_id, u.display_name as owner_name
+        FROM {$wpdb->prefix}lef_group_wishlists gw
+        JOIN {$wpdb->posts} p ON gw.wishlist_ID = p.ID
+        JOIN {$wpdb->users} u ON p.post_author = u.ID
+        WHERE gw.group_ID = %d
+    ", $group_id));
+
+    // Get all users who have joined the group
+    $users = $wpdb->get_results($wpdb->prepare("
+        SELECT u.ID as id, u.display_name
+        FROM {$wpdb->prefix}lef_groups_users gu
+        JOIN {$wpdb->users} u ON gu.user_ID = u.ID
+        WHERE gu.group_ID = %d AND gu.has_joined = 1
+    ", $group_id));
+
+    wp_send_json_success([
+        'wishlists' => $wishlists,
+        'users' => $users
+    ]);
+}
+add_action('wp_ajax_lef_get_group_wishlists_and_users', 'lef_get_group_wishlists_and_users');
+add_action('wp_ajax_nopriv_lef_get_group_wishlists_and_users', 'lef_get_group_wishlists_and_users');
+
+function lef_save_wishlist_assignments() {
+    if (!isset($_POST['group_id']) || !isset($_POST['assignments'])) {
+        wp_send_json_error(['message' => 'Missing required data']);
+    }
+
+    global $wpdb;
+    $group_id = intval($_POST['group_id']);
+    $current_user_id = get_current_user_id();
+    $assignments = $_POST['assignments'];
+
+    // Check if user is an owner of the group
+    $is_owner = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$wpdb->prefix}lef_groups_users 
+         WHERE group_ID = %d AND user_ID = %d AND is_owner = 1",
+        $group_id,
+        $current_user_id
+    ));
+
+    if (!$is_owner) {
+        wp_send_json_error(['message' => 'You are not authorized to perform this action']);
+    }
+
+    // Start transaction
+    $wpdb->query('START TRANSACTION');
+
+    try {
+        // First, clear any existing assignments for this group
+        $wpdb->update(
+            $wpdb->prefix . 'lef_group_wishlists',
+            ['accessible_by' => null],
+            ['group_ID' => $group_id],
+            ['%s'],
+            ['%d']
+        );
+
+        // Insert new assignments
+        foreach ($assignments as $wishlist_id => $assignment) {
+            $wpdb->update(
+                $wpdb->prefix . 'lef_group_wishlists',
+                ['accessible_by' => $assignment['assigned_to_id']],
+                [
+                    'group_ID' => $group_id,
+                    'wishlist_ID' => $wishlist_id
+                ],
+                ['%d'],
+                ['%d', '%d']
+            );
+        }
+
+        $wpdb->query('COMMIT');
+        wp_send_json_success(['message' => 'Assignments saved successfully']);
+    } catch (Exception $e) {
+        $wpdb->query('ROLLBACK');
+        wp_send_json_error(['message' => 'Failed to save assignments: ' . $e->getMessage()]);
+    }
+}
+add_action('wp_ajax_lef_save_wishlist_assignments', 'lef_save_wishlist_assignments');
+add_action('wp_ajax_nopriv_lef_save_wishlist_assignments', 'lef_save_wishlist_assignments');

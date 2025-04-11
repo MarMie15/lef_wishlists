@@ -60,6 +60,7 @@ function lef_display_wishlists() {
 // Function to display groups
 function lef_display_groups() {
     echo '<h2>Your Groups</h2>';
+    echo do_shortcode('[lef_create_group_form]');
     echo do_shortcode('[lef_display_user_groups]');
 }
 

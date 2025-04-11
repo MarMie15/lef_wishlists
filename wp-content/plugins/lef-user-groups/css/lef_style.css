@@ -355,6 +355,36 @@ ul {
     color: white !important;
 }
 
+/* Notice Styles */
+.lef-notice {
+    margin-top: 25px;
+    position: fixed;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    padding: 15px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.lef-notice p {
+    margin: 0;
+}
+
+.lef-notice-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.lef-notice-error {
+    background-color: #ff3333;
+    color: white;
+}
+
+
+
 
 
 /* testing css */

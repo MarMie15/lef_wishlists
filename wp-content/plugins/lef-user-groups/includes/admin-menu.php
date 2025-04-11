@@ -240,11 +240,3 @@ function lef_logo_image_callback() {
     </script>
     <?php
 }
-
-
-
-//putting the logo somewhere
-// $logo = get_option('lef_logo_image');
-// if ($logo) {
-//     echo '<img src="' . esc_url($logo) . '" alt="Site Logo">';
-// }
